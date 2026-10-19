@@ -1,0 +1,2173 @@
+<title>Anatomi Rumah Nusantara</title>
+<meta name="claude:viewport-fit-sides" content="cover">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Bricolage+Grotesque:opsz,wght@12..96,600..800&family=IBM+Plex+Mono:wght@400;500&family=IBM+Plex+Sans:wght@400;500;600&display=swap" rel="stylesheet">
+<style>
+/* Layout: pilihan rumah di atas, panggung 3D lebar di kiri, daftar bagian + kartu info di kanan; satu kolom di layar sempit. */
+:root {
+  --bg: #e6ebf3;
+  --stage-a: #f3f6fb;
+  --stage-b: #bfcbe0;
+  --panel: #f6f8fb;
+  --ink: #13203a;
+  --muted: #52607c;
+  --line: #c9d2e2;
+  --chip: #e8edf6;
+  --gold: #d9a441;
+  --on-gold: #2a1c04;
+  --accent: #8a5c08;
+  --ring: #6f7fa3;
+  --f-display: 'Bricolage Grotesque', 'Segoe UI', system-ui, sans-serif;
+  --f-body: 'IBM Plex Sans', system-ui, -apple-system, 'Segoe UI', sans-serif;
+  --f-mono: 'IBM Plex Mono', ui-monospace, 'SF Mono', Menlo, monospace;
+}
+@media (prefers-color-scheme: dark) {
+  :root:not([data-theme="light"]) {
+    --bg: #090e1d;
+    --stage-a: #26345f;
+    --stage-b: #0a1022;
+    --panel: #111a33;
+    --ink: #e9edf7;
+    --muted: #9ba8c6;
+    --line: #27355b;
+    --chip: #1a2548;
+    --gold: #e2b04f;
+    --on-gold: #241802;
+    --accent: #e5b559;
+    --ring: #5a6c9c;
+    color-scheme: dark;
+  }
+}
+:root[data-theme="dark"] {
+  --bg: #090e1d;
+  --stage-a: #26345f;
+  --stage-b: #0a1022;
+  --panel: #111a33;
+  --ink: #e9edf7;
+  --muted: #9ba8c6;
+  --line: #27355b;
+  --chip: #1a2548;
+  --gold: #e2b04f;
+  --on-gold: #241802;
+  --accent: #e5b559;
+  --ring: #5a6c9c;
+  color-scheme: dark;
+}
+
+* { box-sizing: border-box; }
+body {
+  margin: 0;
+  background: var(--bg);
+  color: var(--ink);
+  font-family: var(--f-body);
+  font-size: 15px;
+  line-height: 1.55;
+}
+.shell {
+  max-width: 1360px;
+  margin: 0 auto;
+  padding-block: 22px 36px;
+  padding-left: max(16px, env(safe-area-inset-left, 0px));
+  padding-right: max(16px, env(safe-area-inset-right, 0px));
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) 390px;
+  gap: 20px;
+}
+.head {
+  grid-column: 1 / -1;
+  display: flex;
+  flex-wrap: wrap;
+  align-items: flex-end;
+  justify-content: space-between;
+  gap: 10px 32px;
+}
+.eyebrow {
+  margin: 0 0 6px;
+  font: 500 12px/1.2 var(--f-mono);
+  letter-spacing: 0.14em;
+  text-transform: uppercase;
+  color: var(--muted);
+}
+h1 {
+  margin: 0;
+  font: 800 clamp(2.1rem, 5.2vw, 3.6rem)/0.98 var(--f-display);
+  letter-spacing: -0.025em;
+  text-wrap: balance;
+}
+.lede { margin: 0; max-width: 40ch; color: var(--muted); text-wrap: pretty; }
+
+/* Pilihan rumah */
+.tabs { grid-column: 1 / -1; display: flex; gap: 8px; overflow-x: auto; padding-bottom: 4px; scrollbar-width: thin; }
+.tab {
+  flex: 0 0 auto;
+  display: flex; flex-direction: column; align-items: flex-start; gap: 1px;
+  padding: 9px 15px;
+  border-radius: 12px;
+  border: 1px solid var(--line);
+  background: var(--panel);
+  color: var(--ink);
+  cursor: pointer;
+  font: inherit;
+  text-align: left;
+}
+.tab .tn { font: 700 16px/1.2 var(--f-display); }
+.tab .tp { font: 400 11px/1.2 var(--f-mono); letter-spacing: 0.06em; color: var(--muted); }
+.tab[aria-selected="true"] { background: var(--ink); color: var(--bg); border-color: var(--ink); }
+.tab[aria-selected="true"] .tp { color: inherit; opacity: 0.75; }
+
+/* Panggung 3D */
+.stage {
+  position: relative;
+  min-width: 0;
+  height: clamp(440px, 74vh, 780px);
+  border-radius: 20px;
+  overflow: hidden;
+  border: 1px solid var(--line);
+  background: radial-gradient(120% 95% at 50% 28%, var(--stage-a), var(--stage-b));
+}
+#gl { position: absolute; inset: 0; width: 100%; height: 100%; display: block; touch-action: none; cursor: grab; }
+#gl:active { cursor: grabbing; }
+.hotspots { position: absolute; inset: 0; pointer-events: none; overflow: hidden; }
+.hs {
+  position: absolute; left: 0; top: 0;
+  width: 34px; height: 34px; margin: -17px 0 0 -17px;
+  display: grid; place-items: center;
+  padding: 0;
+  border-radius: 50%;
+  border: 1.5px solid var(--ink);
+  background: var(--panel);
+  color: var(--ink);
+  font: 500 13px/1 var(--f-mono);
+  cursor: pointer;
+  pointer-events: auto;
+  will-change: transform;
+}
+.hs .tag {
+  position: absolute; left: calc(100% + 8px); top: 50%;
+  transform: translateY(-50%);
+  white-space: nowrap;
+  padding: 3px 9px;
+  border-radius: 6px;
+  border: 1px solid var(--line);
+  background: var(--panel);
+  color: var(--ink);
+  font: 600 12px/1.3 var(--f-display);
+  opacity: 0;
+  pointer-events: none;
+  transition: opacity 0.15s;
+}
+.hs:hover .tag, .hs:focus-visible .tag, .hs.on .tag { opacity: 1; }
+.hs.on { background: var(--gold); border-color: var(--gold); color: var(--on-gold); }
+.cmp {
+  position: absolute; left: 0; top: 0;
+  pointer-events: none;
+  font: 500 11px/1 var(--f-mono);
+  color: var(--muted);
+  letter-spacing: 0.08em;
+  margin: -6px 0 0 -4px;
+  will-change: transform;
+}
+.hud {
+  position: absolute; top: 12px; left: 14px; right: 14px;
+  display: flex; flex-wrap: wrap; justify-content: space-between; gap: 4px 16px;
+  pointer-events: none;
+  font: 400 12px/1.4 var(--f-mono);
+  color: var(--muted);
+}
+#hint { transition: opacity 0.6s; }
+#hint.fade { opacity: 0; }
+.controls {
+  position: absolute; left: 12px; right: 12px; bottom: 12px;
+  display: flex; flex-wrap: wrap; align-items: center; gap: 10px 14px;
+  padding: 10px 12px;
+  border-radius: 14px;
+  border: 1px solid var(--line);
+  background: var(--panel);
+  background: color-mix(in srgb, var(--panel) 90%, transparent);
+  backdrop-filter: blur(8px);
+}
+.btn {
+  font: 500 13px/1 var(--f-mono);
+  padding: 9px 13px;
+  border-radius: 8px;
+  border: 1px solid var(--line);
+  background: var(--panel);
+  color: var(--ink);
+  cursor: pointer;
+}
+.btn.primary { background: var(--gold); color: var(--on-gold); border-color: transparent; min-width: 84px; }
+.btn[aria-pressed="true"] { background: var(--ink); color: var(--bg); border-color: var(--ink); }
+.slider { flex: 1 1 160px; min-width: 0; display: flex; align-items: center; gap: 10px; font: 400 12px/1 var(--f-mono); color: var(--muted); }
+.slider input { flex: 1; min-width: 0; accent-color: var(--gold); }
+.check { display: inline-flex; align-items: center; gap: 7px; font: 400 12px/1 var(--f-mono); color: var(--muted); cursor: pointer; }
+.check input { accent-color: var(--gold); }
+.fallback { position: absolute; inset: 0; margin: 0; display: grid; place-items: center; padding: 24px; text-align: center; color: var(--muted); }
+button:focus-visible, input:focus-visible, a:focus-visible { outline: 2px solid var(--accent); outline-offset: 2px; }
+
+/* Panel kanan */
+.panel { min-width: 0; display: flex; flex-direction: column; gap: 16px; }
+.list-h {
+  margin: 0 0 6px;
+  font: 500 11px/1.2 var(--f-mono);
+  letter-spacing: 0.14em;
+  text-transform: uppercase;
+  color: var(--muted);
+}
+.layers { list-style: none; margin: 0; padding: 0; display: flex; flex-direction: column; gap: 2px; }
+.layer {
+  width: 100%;
+  display: grid; grid-template-columns: 30px minmax(0, 1fr); align-items: center; gap: 12px;
+  padding: 8px 10px;
+  border-radius: 10px;
+  border: 1px solid transparent;
+  background: transparent;
+  color: var(--ink);
+  text-align: left;
+  cursor: pointer;
+  font: inherit;
+}
+.layer:hover { background: var(--chip); }
+.layer[aria-pressed="true"] { background: var(--chip); border-color: var(--line); }
+.num {
+  width: 28px; height: 28px; display: grid; place-items: center;
+  border-radius: 50%;
+  border: 1px solid var(--muted);
+  font: 500 12px/1 var(--f-mono);
+  color: var(--muted);
+}
+.layer[aria-pressed="true"] .num { background: var(--gold); border-color: var(--gold); color: var(--on-gold); }
+.nm { display: block; font: 600 16px/1.25 var(--f-display); }
+.sb { display: block; font-size: 13px; color: var(--muted); }
+.card {
+  border: 1px solid var(--line);
+  border-radius: 16px;
+  background: var(--panel);
+  padding: 18px 18px 16px;
+  min-width: 0;
+}
+.card .kicker { margin: 0 0 6px; font: 500 11px/1.2 var(--f-mono); letter-spacing: 0.14em; text-transform: uppercase; color: var(--accent); }
+.card h2 { margin: 0 0 10px; font: 700 24px/1.12 var(--f-display); letter-spacing: -0.01em; text-wrap: balance; }
+.card p { margin: 0 0 10px; text-wrap: pretty; }
+.card .note { margin: 12px 0 0; padding-top: 10px; border-top: 1px solid var(--line); font-size: 13px; color: var(--muted); }
+.card .src { margin: 10px 0 0; font: 400 12px/1.7 var(--f-mono); color: var(--muted); }
+.card .src a { color: var(--accent); text-underline-offset: 2px; margin-right: 10px; display: inline-block; }
+
+@media (max-width: 920px) {
+  .shell { grid-template-columns: minmax(0, 1fr); }
+  .stage { height: clamp(430px, 68svh, 660px); }
+  .controls { gap: 8px 10px; }
+}
+@media (max-width: 520px) {
+  .hud { top: 10px; }
+  #readout { margin-left: auto; }
+}
+@media (prefers-reduced-motion: reduce) {
+  * { transition: none !important; }
+}
+</style>
+
+<main class="shell">
+  <header class="head">
+    <div>
+      <p class="eyebrow">Rumah adat Nusantara · prototipe 02</p>
+      <h1>Anatomi Rumah Nusantara</h1>
+    </div>
+    <p class="lede">Pilih rumah, putar 360°, bongkar lapis demi lapis, lalu ketuk penanda untuk membaca fungsi tiap bagian.</p>
+  </header>
+
+  <nav class="tabs" id="tabs" role="tablist" aria-label="Pilih rumah adat"></nav>
+
+  <section class="stage" id="stage" aria-label="Model 3D rumah adat">
+    <canvas id="gl" role="img" aria-label="Model 3D rumah adat yang bisa diputar dan dibongkar"></canvas>
+    <div class="hotspots" id="hotspots"></div>
+    <div class="hud">
+      <span id="hint">Seret untuk memutar · cubit atau scroll untuk zoom</span>
+      <span id="readout">Sudut 0° · Terbongkar 0%</span>
+    </div>
+    <div class="controls">
+      <button class="btn primary" id="toggle" type="button">Bongkar</button>
+      <label class="slider" for="ex"><span>Bongkar</span><input id="ex" type="range" min="0" max="100" value="0"></label>
+      <button class="btn" id="quake" type="button" aria-pressed="false" hidden>Simulasi gempa</button>
+      <label class="check" for="spin"><input id="spin" type="checkbox"> Putar otomatis</label>
+      <button class="btn" id="reset" type="button">Reset</button>
+    </div>
+    <p class="fallback" id="fallback" hidden>Browser ini belum bisa menampilkan grafik 3D (WebGL). Coba buka di Chrome, Safari, atau Firefox versi terbaru.</p>
+  </section>
+
+  <aside class="panel">
+    <div>
+      <h2 class="list-h" id="h1"></h2>
+      <ol class="layers" id="layers"></ol>
+    </div>
+    <div id="box2">
+      <h2 class="list-h" id="h2"></h2>
+      <ol class="layers" id="spaces"></ol>
+    </div>
+    <article class="card" id="card" aria-live="polite"></article>
+  </aside>
+</main>
+
+<script src="https://cdn.jsdelivr.net/npm/three@0.147.0/build/three.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/three@0.147.0/examples/js/controls/OrbitControls.js"></script>
+<script>
+var App = (function () {
+  'use strict';
+  var THREE = window.THREE;
+  var $ = function (s) { return document.querySelector(s); };
+  var houses = {}, order = [], cur = null;
+  var stage = $('#stage'), canvas = $('#gl'), hsBox = $('#hotspots'), card = $('#card');
+  var list1 = $('#layers'), list2 = $('#spaces'), list1H = $('#h1'), list2H = $('#h2'), box2 = $('#box2');
+  var tabsEl = $('#tabs'), readout = $('#readout'), hint = $('#hint');
+  var exRange = $('#ex'), toggleBtn = $('#toggle'), spin = $('#spin'), resetBtn = $('#reset'), quakeBtn = $('#quake');
+  var reduce = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+
+  /* =========================================================
+     Toolkit: tekstur, material, geometri (dipakai tiap rumah)
+     ========================================================= */
+  var T = { THREE: THREE, m: {}, tex: {} };
+  var cache = {};
+  function canvasTex(w, h, draw, rx, ry) {
+    var c = document.createElement('canvas'); c.width = w; c.height = h;
+    draw(c.getContext('2d'), w, h);
+    var t = new THREE.CanvasTexture(c);
+    t.wrapS = t.wrapT = THREE.RepeatWrapping;
+    if (rx) t.repeat.set(rx, ry || rx);
+    t.anisotropy = 4;
+    return t;
+  }
+  var WOODS = {
+    teak: ['#8c4d24', '#4a2410', '#b9703a'],
+    ulin: ['#5b3d26', '#26150b', '#8a6240'],
+    nangka: ['#9a6a2e', '#5b3a14', '#c79a55'],
+    papan: ['#7b4b2a', '#3b200f', '#a8703f'],
+    merah: ['#7c3322', '#38150c', '#a85a38']
+  };
+  T.tex.wood = function (kind, horiz) {
+    var key = 'w' + kind + (horiz ? 'h' : 'v');
+    if (cache[key]) return cache[key];
+    var c = WOODS[kind];
+    var t = canvasTex(128, 128, function (g, w, h) {
+      g.fillStyle = c[0]; g.fillRect(0, 0, w, h);
+      for (var i = 0; i < 80; i++) {
+        var x = Math.random() * w;
+        g.strokeStyle = Math.random() > 0.5 ? c[1] : c[2];
+        g.globalAlpha = 0.1 + Math.random() * 0.14;
+        g.lineWidth = 0.6 + Math.random() * 1.8;
+        g.beginPath(); g.moveTo(x, 0); g.bezierCurveTo(x + 5, h * 0.3, x - 5, h * 0.7, x + 2, h); g.stroke();
+      }
+    });
+    if (horiz) { t.center.set(0.5, 0.5); t.rotation = Math.PI / 2; }
+    cache[key] = t; return t;
+  };
+  T.tex.stone = function (light) {
+    var key = 's' + (light ? 1 : 0);
+    if (cache[key]) return cache[key];
+    var base = light ? '#a3aaa0' : '#7d877f';
+    var t = canvasTex(128, 128, function (g, w, h) {
+      g.fillStyle = base; g.fillRect(0, 0, w, h);
+      for (var i = 0; i < 700; i++) {
+        g.globalAlpha = 0.12 + Math.random() * 0.2;
+        g.fillStyle = Math.random() > 0.5 ? '#4f5953' : '#c4cbc2';
+        g.fillRect(Math.random() * w, Math.random() * h, 1 + Math.random() * 2.5, 1 + Math.random() * 2.5);
+      }
+    });
+    cache[key] = t; return t;
+  };
+  T.tex.tile = function (rx, ry) {
+    return canvasTex(128, 128, function (g, w, h) {
+      g.fillStyle = '#9a9ea4'; g.fillRect(0, 0, w, h);
+      g.strokeStyle = '#6d7178'; g.lineWidth = 3; g.strokeRect(0, 0, w, h);
+      for (var i = 0; i < 160; i++) { g.globalAlpha = 0.07; g.fillStyle = Math.random() > 0.5 ? '#fff' : '#000'; g.fillRect(Math.random() * w, Math.random() * h, 3, 3); }
+    }, rx, ry);
+  };
+  T.tex.roof = function (kind) {
+    var key = 'r' + kind;
+    if (cache[key]) return cache[key];
+    var t;
+    if (kind === 'tile') {
+      t = canvasTex(256, 256, function (g, w, h) {
+        g.fillStyle = '#6a3226'; g.fillRect(0, 0, w, h);
+        var rows = 12, rh = h / rows;
+        for (var r = 0; r < rows; r++) {
+          var off = (r % 2) * 12;
+          for (var x = -12; x < w; x += 24) {
+            g.globalAlpha = 1;
+            g.fillStyle = (r + Math.floor(x / 24)) % 3 === 0 ? '#74382b' : '#612d22';
+            g.fillRect(x + off + 1, r * rh + 1, 22, rh - 2);
+          }
+          g.globalAlpha = 0.55; g.fillStyle = '#2b110c'; g.fillRect(0, r * rh + rh - 2, w, 2);
+        }
+      }, 6, 4);
+    } else {
+      var base = kind === 'ijuk' ? '#2a2420' : '#9a8148';
+      var lite = kind === 'ijuk' ? '#4a4038' : '#c4aa62';
+      var dark = kind === 'ijuk' ? '#0f0c0a' : '#5e4d26';
+      t = canvasTex(256, 256, function (g, w, h) {
+        g.fillStyle = base; g.fillRect(0, 0, w, h);
+        for (var i = 0; i < 900; i++) {
+          g.strokeStyle = Math.random() > 0.5 ? lite : dark;
+          g.globalAlpha = 0.18 + Math.random() * 0.3;
+          g.lineWidth = 0.6 + Math.random() * 1.4;
+          var x = Math.random() * w, y = Math.random() * h;
+          g.beginPath(); g.moveTo(x, y); g.lineTo(x + (Math.random() - 0.5) * 3, y + 14 + Math.random() * 26); g.stroke();
+        }
+        g.globalAlpha = 0.5; g.fillStyle = dark;
+        for (var b = 0; b < 8; b++) g.fillRect(0, b * 32 + 28, w, 2);
+      }, 4, 3);
+    }
+    cache[key] = t; return t;
+  };
+  T.tex.carve = function (kind) {
+    var key = 'c' + kind;
+    if (cache[key]) return cache[key];
+    var t;
+    if (kind === 'toraja') {
+      t = canvasTex(256, 256, function (g, w, h) {
+        g.fillStyle = '#17110d'; g.fillRect(0, 0, w, h);
+        for (var gy = 0; gy < 4; gy++) for (var gx = 0; gx < 4; gx++) {
+          var cx = gx * 64 + 32, cy = gy * 64 + 32;
+          g.fillStyle = (gx + gy) % 2 ? '#b3261e' : '#d9a62f';
+          g.beginPath(); g.moveTo(cx, cy - 28); g.lineTo(cx + 28, cy); g.lineTo(cx, cy + 28); g.lineTo(cx - 28, cy); g.closePath(); g.fill();
+          g.fillStyle = '#17110d';
+          g.beginPath(); g.moveTo(cx, cy - 16); g.lineTo(cx + 16, cy); g.lineTo(cx, cy + 16); g.lineTo(cx - 16, cy); g.closePath(); g.fill();
+          g.fillStyle = '#efe6d0'; g.beginPath(); g.arc(cx, cy, 5, 0, 6.283); g.fill();
+        }
+        g.strokeStyle = '#b3261e'; g.lineWidth = 3;
+        for (var k = 0; k < 4; k++) { g.beginPath(); g.moveTo(0, k * 64); g.lineTo(w, k * 64); g.stroke(); }
+      });
+    } else if (kind === 'gorga') {
+      t = canvasTex(256, 256, function (g, w, h) {
+        g.fillStyle = '#efe6d0'; g.fillRect(0, 0, w, h);
+        g.fillStyle = '#b3261e';
+        for (var gy = 0; gy < 4; gy++) for (var gx = 0; gx < 4; gx++) {
+          var cx = gx * 64 + 32, cy = gy * 64 + 32;
+          g.beginPath(); g.arc(cx, cy, 24, 0, 6.283); g.fill();
+          g.fillStyle = '#17110d'; g.beginPath(); g.arc(cx, cy, 13, 0, 6.283); g.fill();
+          g.fillStyle = '#b3261e';
+        }
+        g.strokeStyle = '#17110d'; g.lineWidth = 4;
+        for (var k = 0; k < 4; k++) { g.beginPath(); g.moveTo(0, k * 64); g.lineTo(w, k * 64); g.stroke(); }
+      });
+    } else if (kind === 'nias') {
+      t = canvasTex(256, 256, function (g, w, h) {
+        g.fillStyle = '#4a2f1c'; g.fillRect(0, 0, w, h);
+        g.strokeStyle = '#c49a63'; g.lineWidth = 5; g.lineJoin = 'miter';
+        for (var r = 0; r < 4; r++) {
+          g.beginPath();
+          for (var x = 0; x <= w; x += 32) { g.lineTo(x, r * 64 + (x / 32 % 2 ? 14 : 50)); }
+          g.stroke();
+        }
+        g.fillStyle = '#c49a63';
+        for (var q = 0; q < 8; q++) for (var p = 0; p < 4; p++) { g.beginPath(); g.arc(q * 32 + 16, p * 64 + 32, 4, 0, 6.283); g.fill(); }
+      });
+    } else {
+      t = canvasTex(256, 256, function (g, w, h) {
+        g.fillStyle = '#6a2c1d'; g.fillRect(0, 0, w, h);
+        g.strokeStyle = '#2a0f08'; g.lineWidth = 2; g.globalAlpha = 0.7;
+        for (var x = 0; x <= w; x += 32) { g.beginPath(); g.moveTo(x, 0); g.lineTo(x, h); g.stroke(); }
+        g.globalAlpha = 1; g.strokeStyle = '#d9a441'; g.lineWidth = 3;
+        for (var row = 0; row < 4; row++) {
+          g.beginPath();
+          for (var xx = 0; xx <= w; xx += 8) { var yy = row * 64 + 32 + Math.sin(xx / 20 + row) * 14; if (xx === 0) g.moveTo(xx, yy); else g.lineTo(xx, yy); }
+          g.stroke();
+          g.fillStyle = '#d9a441';
+          for (var c = 0; c < 4; c++) { g.beginPath(); g.arc(c * 64 + 32, row * 64 + 32 + Math.sin((c * 64 + 32) / 20 + row) * 14, 5, 0, 6.283); g.fill(); }
+        }
+      });
+    }
+    cache[key] = t; return t;
+  };
+  T.tex.woven = function () {
+    if (cache.woven) return cache.woven;
+    var t = canvasTex(128, 128, function (g, w, h) {
+      g.fillStyle = '#b79b62'; g.fillRect(0, 0, w, h);
+      for (var i = -h; i < w + h; i += 12) {
+        g.strokeStyle = i % 24 ? '#8a7140' : '#d5bd82'; g.lineWidth = 5; g.globalAlpha = 0.85;
+        g.beginPath(); g.moveTo(i, 0); g.lineTo(i + h, h); g.stroke();
+        g.beginPath(); g.moveTo(i + h, 0); g.lineTo(i, h); g.stroke();
+      }
+    }, 5, 2);
+    cache.woven = t; return t;
+  };
+
+  function M(opts, base) {
+    opts.emissive = new THREE.Color(0xd9a441);
+    opts.emissiveIntensity = 0;
+    var m = new THREE.MeshStandardMaterial(opts);
+    m.userData.base = base == null ? 1 : base;
+    return m;
+  }
+  T.m.wood = function (kind, horiz) { return M({ map: T.tex.wood(kind, horiz), roughness: 0.78, metalness: 0 }); };
+  T.m.stone = function (light) { return M({ map: T.tex.stone(light), roughness: 0.95, metalness: 0 }); };
+  T.m.gold = function () { return M({ color: 0xc9972f, roughness: 0.42, metalness: 0.25 }); };
+  T.m.roof = function (kind) { return M({ map: T.tex.roof(kind), roughness: 0.88, metalness: 0, side: THREE.DoubleSide }); };
+  T.m.plain = function (color, rough, dbl) { return M({ color: color, roughness: rough == null ? 0.8 : rough, metalness: 0, side: dbl ? THREE.DoubleSide : THREE.FrontSide }); };
+  T.m.map = function (map, dbl) { return M({ map: map, roughness: 0.85, metalness: 0, side: dbl ? THREE.DoubleSide : THREE.FrontSide }); };
+
+  T.box = function (w, h, d, m, x, y, z) {
+    var b = new THREE.Mesh(new THREE.BoxGeometry(w, h, d), m);
+    b.position.set(x || 0, y || 0, z || 0);
+    return b;
+  };
+  T.cyl = function (rt, rb, h, seg, m, x, y, z) {
+    var c = new THREE.Mesh(new THREE.CylinderGeometry(rt, rb, h, seg || 12), m);
+    c.position.set(x || 0, y || 0, z || 0);
+    return c;
+  };
+  T.strut = function (a, b, th, m) {
+    var A = new THREE.Vector3(a[0], a[1], a[2]), B = new THREE.Vector3(b[0], b[1], b[2]);
+    var d = B.clone().sub(A), len = d.length();
+    var mesh = new THREE.Mesh(new THREE.BoxGeometry(th, len, th), m);
+    mesh.position.copy(A).add(B).multiplyScalar(0.5);
+    mesh.quaternion.setFromUnitVectors(new THREE.Vector3(0, 1, 0), d.normalize());
+    return mesh;
+  };
+  T.frustum = function (bx, bz, tx, tz, h) {
+    var v = [[-bx,0,-bz],[bx,0,-bz],[bx,0,bz],[-bx,0,bz],[-tx,h,-tz],[tx,h,-tz],[tx,h,tz],[-tx,h,tz]];
+    var faces = [[0,1,5,4],[1,2,6,5],[2,3,7,6],[3,0,4,7]];
+    var pos = [], uv = [];
+    faces.forEach(function (f) {
+      var a = v[f[0]], b = v[f[1]], c = v[f[2]], d = v[f[3]];
+      pos.push.apply(pos, a.concat(b, c, a, c, d));
+      uv.push(0,0, 1,0, 1,1, 0,0, 1,1, 0,1);
+    });
+    var g = new THREE.BufferGeometry();
+    g.setAttribute('position', new THREE.Float32BufferAttribute(pos, 3));
+    g.setAttribute('uv', new THREE.Float32BufferAttribute(uv, 2));
+    g.computeVertexNormals();
+    return g;
+  };
+  // Atap lengkung: sumbu panjang = z, t dari -1 ke 1 sepanjang atap.
+  T.curveRoof = function (o) {
+    var nz = o.nz || 28, nu = o.nu || 12, pos = [], uv = [], idx = [], i, j;
+    for (i = 0; i <= nz; i++) {
+      var t = i / nz * 2 - 1, z = t * o.L, e = o.eave(t), r = o.ridge(t), w = o.halfW(t);
+      for (j = 0; j <= nu; j++) {
+        var u = j / nu * 2 - 1, f = Math.pow(1 - Math.abs(u), o.shape || 1);
+        pos.push(u * w, e + (r - e) * f, z);
+        uv.push((u * 0.5 + 0.5) * (o.rx || 3), (i / nz) * (o.ry || 5));
+      }
+    }
+    var row = nu + 1;
+    for (i = 0; i < nz; i++) for (j = 0; j < nu; j++) {
+      var a = i * row + j, b = a + 1, c = a + row, d = c + 1;
+      idx.push(a, c, b, b, c, d);
+    }
+    var g = new THREE.BufferGeometry();
+    g.setAttribute('position', new THREE.Float32BufferAttribute(pos, 3));
+    g.setAttribute('uv', new THREE.Float32BufferAttribute(uv, 2));
+    g.setIndex(idx);
+    g.computeVertexNormals();
+    return g;
+  };
+  // Tabung meruncing mengikuti kurva (tanduk, gonjong).
+  T.tube = function (pts, r0, r1, m, seg, n) {
+    seg = seg || 10; n = n || 22;
+    var curve = new THREE.CatmullRomCurve3(pts.map(function (p) { return new THREE.Vector3(p[0], p[1], p[2]); }));
+    var fr = curve.computeFrenetFrames(n, false);
+    var pos = [], idx = [], i, j;
+    for (i = 0; i <= n; i++) {
+      var P = curve.getPointAt(i / n), N = fr.normals[i], B = fr.binormals[i], r = r0 + (r1 - r0) * (i / n);
+      for (j = 0; j <= seg; j++) {
+        var a = j / seg * Math.PI * 2, cs = Math.cos(a), sn = Math.sin(a);
+        pos.push(P.x + r * (cs * N.x + sn * B.x), P.y + r * (cs * N.y + sn * B.y), P.z + r * (cs * N.z + sn * B.z));
+      }
+    }
+    for (i = 0; i < n; i++) for (j = 0; j < seg; j++) {
+      var p = i * (seg + 1) + j, q = (i + 1) * (seg + 1) + j;
+      idx.push(p, q, p + 1, p + 1, q, q + 1);
+    }
+    var g = new THREE.BufferGeometry();
+    g.setAttribute('position', new THREE.Float32BufferAttribute(pos, 3));
+    g.setIndex(idx); g.computeVertexNormals();
+    return new THREE.Mesh(g, m);
+  };
+  // Papan segi banyak di bidang x-y (untuk bagian depan atap), tebal d.
+  T.gable = function (pts, d, m) {
+    var s = new THREE.Shape(); s.moveTo(pts[0][0], pts[0][1]);
+    for (var i = 1; i < pts.length; i++) s.lineTo(pts[i][0], pts[i][1]);
+    s.closePath();
+    var g = new THREE.ExtrudeGeometry(s, { depth: d, bevelEnabled: false });
+    g.translate(0, 0, -d / 2);
+    return new THREE.Mesh(g, m);
+  };
+  T.spread = function (L, obj, dir) { L.spreads.push({ obj: obj, p0: obj.position.clone(), dir: dir }); };
+  // Penanda ruang: bidang emas di lantai (dan kolom tipis bila diminta).
+  T.zone = function (L, spec) {
+    var gold = 0xe2b04f, y = spec.y == null ? 0.05 : spec.y, g = L.group;
+    spec.cells.forEach(function (c) {
+      var pm = new THREE.MeshBasicMaterial({ color: gold, transparent: true, opacity: c.a == null ? 0.2 : c.a, depthWrite: false, side: THREE.DoubleSide });
+      pm.userData.base = pm.opacity; pm.userData.forceT = true; pm.userData.noDepth = true;
+      var geo = new THREE.PlaneGeometry(c.w, c.d); geo.rotateX(-Math.PI / 2);
+      var m = new THREE.Mesh(geo, pm); m.position.set(c.x, y, c.z); m.userData.nopick = true; g.add(m);
+      var em = new THREE.LineBasicMaterial({ color: gold, transparent: true, opacity: 0.95 });
+      em.userData.base = 0.95; em.userData.forceT = true; em.userData.noDepth = true;
+      var e = new THREE.LineSegments(new THREE.EdgesGeometry(new THREE.BoxGeometry(c.w, 0.02, c.d)), em);
+      e.position.set(c.x, y + 0.01, c.z); g.add(e);
+    });
+    if (spec.vol) {
+      var vm = new THREE.MeshBasicMaterial({ color: gold, transparent: true, opacity: 0.08, depthWrite: false, side: THREE.DoubleSide });
+      vm.userData.base = 0.08; vm.userData.forceT = true; vm.userData.noDepth = true;
+      var v = new THREE.Mesh(new THREE.BoxGeometry(spec.vol[0], spec.vol[1], spec.vol[2]), vm);
+      v.position.set(spec.vol[3], y + spec.vol[1] / 2, spec.vol[4]); v.visible = false; v.userData.nopick = true;
+      g.add(v); L.vol = v;
+    }
+  };
+
+  /* =========================================================
+     Registrasi rumah
+     ========================================================= */
+  function register(h) { houses[h.id] = h; order.push(h.id); h.defs = {}; h.layers.forEach(function (d) { h.defs[d.key] = d; }); }
+
+  /* =========================================================
+     Scene bersama
+     ========================================================= */
+  var renderer, scene, camera, controls, ringG, ringMat, cmpEls = [], sun, ground;
+  var selected = null, ex = 0, exT = 0, curTy = 4.4, bdPrev = 1, quakeOn = false, qa = 0;
+  var layerBtns = {};
+
+  function setupScene() {
+    renderer = new THREE.WebGLRenderer({ canvas: canvas, antialias: true, alpha: true });
+    renderer.setPixelRatio(Math.min(window.devicePixelRatio || 1, 2));
+    renderer.shadowMap.enabled = true;
+    renderer.shadowMap.type = THREE.PCFSoftShadowMap;
+    renderer.setClearColor(0x000000, 0);
+    scene = new THREE.Scene();
+    camera = new THREE.PerspectiveCamera(36, 1, 0.1, 400);
+    controls = new THREE.OrbitControls(camera, canvas);
+    controls.enableDamping = true; controls.dampingFactor = 0.08; controls.enablePan = false;
+    controls.rotateSpeed = 0.8; controls.zoomSpeed = 0.8;
+    controls.maxPolarAngle = Math.PI / 2 - 0.02;
+    controls.autoRotateSpeed = 1.3;
+    scene.add(new THREE.HemisphereLight(0xe3ebff, 0x4a3524, 0.95));
+    sun = new THREE.DirectionalLight(0xfff1da, 1.15);
+    sun.position.set(10, 20, 8);
+    sun.castShadow = true;
+    sun.shadow.mapSize.set(2048, 2048);
+    sun.shadow.camera.left = -19; sun.shadow.camera.right = 19;
+    sun.shadow.camera.top = 19; sun.shadow.camera.bottom = -19;
+    sun.shadow.camera.near = 1; sun.shadow.camera.far = 90;
+    sun.shadow.bias = -0.0006;
+    scene.add(sun);
+    var fill = new THREE.DirectionalLight(0x9ab6ff, 0.4);
+    fill.position.set(-10, 6, -9);
+    scene.add(fill);
+    ground = new THREE.Mesh(new THREE.PlaneGeometry(90, 90), new THREE.ShadowMaterial({ opacity: 0.24 }));
+    ground.rotation.x = -Math.PI / 2; ground.receiveShadow = true; scene.add(ground);
+
+    // cincin derajat (bearing 0 = utara = -z, searah jarum jam)
+    ringMat = new THREE.LineBasicMaterial({ color: 0x6f7fa3, transparent: true, opacity: 0.85 });
+    ringG = new THREE.Group(); scene.add(ringG);
+    var R = 10.4, pts = [], d;
+    for (d = 0; d < 360; d += 5) {
+      var len = d % 45 === 0 ? 1.0 : d % 15 === 0 ? 0.5 : 0.22;
+      var a = d * Math.PI / 180, s = Math.sin(a), c = -Math.cos(a);
+      pts.push(R * s, 0.02, R * c, (R + len) * s, 0.02, (R + len) * c);
+    }
+    var tg = new THREE.BufferGeometry(); tg.setAttribute('position', new THREE.Float32BufferAttribute(pts, 3));
+    ringG.add(new THREE.LineSegments(tg, ringMat));
+    var cp = [];
+    for (var i = 0; i <= 160; i++) { var b = i / 160 * Math.PI * 2; cp.push(R * Math.sin(b), 0.02, -R * Math.cos(b)); }
+    var cg = new THREE.BufferGeometry(); cg.setAttribute('position', new THREE.Float32BufferAttribute(cp, 3));
+    ringG.add(new THREE.Line(cg, ringMat));
+    [['U', 0, -1], ['T', 1, 0], ['S', 0, 1], ['B', -1, 0]].forEach(function (c) {
+      var e = document.createElement('span'); e.className = 'cmp'; e.textContent = c[0]; e.setAttribute('aria-hidden', 'true');
+      hsBox.appendChild(e); cmpEls.push({ el: e, dx: c[1], dz: c[2], v: new THREE.Vector3() });
+    });
+    applyTheme();
+    try {
+      window.matchMedia('(prefers-color-scheme: dark)').addEventListener('change', applyTheme);
+      new MutationObserver(applyTheme).observe(document.documentElement, { attributes: true, attributeFilter: ['data-theme'] });
+    } catch (e) {}
+  }
+  function applyTheme() {
+    var v = getComputedStyle(document.documentElement).getPropertyValue('--ring').trim();
+    if (v && ringMat) ringMat.color.set(v);
+  }
+
+  /* =========================================================
+     Bangun rumah (sekali, saat pertama dipilih)
+     ========================================================= */
+  function assignNumbers(h) {
+    var i = 0;
+    h.layers.forEach(function (d) { d._n = d.space ? (d.n || '•') : String(++i); });
+  }
+  function build(h) {
+    assignNumbers(h);
+    h.root = new THREE.Group(); scene.add(h.root);
+    h.L = {}; h.keys = []; h.pickables = []; h.hsEls = []; h.hs = {};
+    h.layers.forEach(function (d) {
+      var g = new THREE.Group(); g.name = d.key; h.root.add(g);
+      var L = { key: d.key, def: d, group: g, fade: 1, sel: 0, mats: [], anchor: new THREE.Object3D(), spreads: [], vol: null };
+      g.add(L.anchor); L.anchor.position.set(d.anchor[0], d.anchor[1], d.anchor[2]);
+      g.position.set(d.base ? d.base[0] : 0, d.base ? d.base[1] : 0, d.base ? d.base[2] : 0);
+      d.build(g, T, L);
+      var seen = [];
+      g.traverse(function (o) {
+        if (o.isMesh || o.isLine) {
+          o.userData.layer = d.key;
+          if (o.isMesh && !o.userData.nopick) { o.castShadow = true; o.receiveShadow = true; h.pickables.push(o); }
+          if (seen.indexOf(o.material) < 0) {
+            seen.push(o.material);
+            if (o.material.userData.base == null) o.material.userData.base = 1;
+            L.mats.push(o.material);
+          }
+        }
+      });
+      h.L[d.key] = L; h.keys.push(d.key);
+      var b = document.createElement('button');
+      b.type = 'button'; b.className = 'hs'; b.setAttribute('aria-label', d.name);
+      b.innerHTML = d._n + '<span class="tag">' + d.name + '</span>';
+      b.addEventListener('click', function () { toggleSel(d.key); });
+      b.style.display = 'none';
+      hsBox.appendChild(b); h.hsEls.push(b); h.hs[d.key] = b;
+    });
+  }
+
+  /* =========================================================
+     UI
+     ========================================================= */
+  function buildTabs() {
+    tabsEl.innerHTML = '';
+    order.forEach(function (id) {
+      var h = houses[id];
+      var b = document.createElement('button');
+      b.type = 'button'; b.className = 'tab'; b.setAttribute('role', 'tab'); b.setAttribute('aria-selected', 'false'); b.dataset.id = id;
+      b.innerHTML = '<span class="tn">' + h.tab + '</span><span class="tp">' + h.place + '</span>';
+      b.addEventListener('click', function () { setHouse(id); });
+      tabsEl.appendChild(b);
+    });
+  }
+  function buildLists() {
+    list1.innerHTML = ''; list2.innerHTML = ''; layerBtns = {};
+    var has2 = false;
+    cur.layers.forEach(function (d) {
+      var li = document.createElement('li');
+      var b = document.createElement('button');
+      b.type = 'button'; b.className = 'layer'; b.setAttribute('aria-pressed', 'false');
+      b.innerHTML = '<span class="num">' + d._n + '</span><span><span class="nm">' + d.name + '</span><span class="sb">' + d.sub + '</span></span>';
+      b.addEventListener('click', function () { toggleSel(d.key); });
+      li.appendChild(b);
+      if (d.space) { list2.appendChild(li); has2 = true; } else list1.appendChild(li);
+      layerBtns[d.key] = b;
+    });
+    list1H.textContent = cur.list1;
+    list2H.textContent = cur.list2 || '';
+    box2.hidden = !has2;
+  }
+  function renderCard(key) {
+    var h = cur, d = key ? h.defs[key] : null;
+    var kicker = d ? d.kicker : h.kicker, title = d ? d.name : h.title;
+    var paras = d ? d.paras : h.paras, note = d ? d.note : h.note, srcs = d ? d.src : h.srcAll;
+    var html = '<p class="kicker">' + kicker + '</p><h2>' + title + '</h2>';
+    paras.forEach(function (p) { html += '<p>' + p + '</p>'; });
+    html += '<p class="note">' + note + '</p><p class="src">Sumber: ';
+    srcs.forEach(function (s) { html += '<a href="' + h.src[s][1] + '" target="_blank" rel="noopener">' + h.src[s][0] + '</a>'; });
+    card.innerHTML = html + '</p>';
+  }
+  function setSel(key) {
+    selected = key;
+    cur.keys.forEach(function (k) {
+      layerBtns[k].setAttribute('aria-pressed', k === key ? 'true' : 'false');
+      cur.hs[k].classList.toggle('on', k === key);
+      if (cur.L[k].vol) cur.L[k].vol.visible = (k === key);
+    });
+    renderCard(key);
+  }
+  function toggleSel(k) { setSel(selected === k ? null : k); }
+  function syncBtn() { toggleBtn.textContent = exT > 0.5 ? 'Rakit' : 'Bongkar'; }
+
+  function setHouse(id) {
+    var h = houses[id]; if (!h) return;
+    if (!h.root) build(h);
+    order.forEach(function (o) {
+      var x = houses[o];
+      if (x.root) { x.root.visible = (o === id); x.hsEls.forEach(function (e) { e.style.display = o === id ? '' : 'none'; }); }
+    });
+    cur = h; quakeOn = false; qa = 0;
+    quakeBtn.hidden = !h.quake; quakeBtn.setAttribute('aria-pressed', 'false');
+    ex = 0; exT = 0; exRange.value = '0'; syncBtn();
+    curTy = h.ty[0]; bdPrev = 1;
+    controls.target.set(0, curTy, 0);
+    camera.position.set(h.home[0], curTy + h.home[1], h.home[2]);
+    ringG.scale.setScalar(h.ringR / 10.4);
+    cmpEls.forEach(function (c) { c.v.set(c.dx * (h.ringR + 1.4), 0.02, c.dz * (h.ringR + 1.4)); });
+    Array.prototype.forEach.call(tabsEl.children, function (b) { b.setAttribute('aria-selected', b.dataset.id === id ? 'true' : 'false'); });
+    buildLists(); setSel(null);
+    try { history.replaceState(null, '', '#' + id); } catch (e) {}
+  }
+
+  /* =========================================================
+     Interaksi
+     ========================================================= */
+  function wire() {
+    exRange.addEventListener('input', function () { exT = exRange.value / 100; syncBtn(); });
+    toggleBtn.addEventListener('click', function () { exT = exT > 0.5 ? 0 : 1; exRange.value = String(Math.round(exT * 100)); syncBtn(); });
+    spin.checked = !reduce; controls.autoRotate = !reduce;
+    spin.addEventListener('change', function () { controls.autoRotate = spin.checked; });
+    controls.addEventListener('start', function () {
+      if (spin.checked) { spin.checked = false; controls.autoRotate = false; }
+      hint.classList.add('fade');
+    });
+    quakeBtn.addEventListener('click', function () {
+      quakeOn = !quakeOn; quakeBtn.setAttribute('aria-pressed', quakeOn ? 'true' : 'false');
+      quakeBtn.textContent = quakeOn ? 'Hentikan gempa' : 'Simulasi gempa';
+    });
+    resetBtn.addEventListener('click', function () {
+      setSel(null);
+      var bd = 1 + cur.bd * ex;
+      camera.position.set(cur.home[0] * bd, controls.target.y + cur.home[1] * bd, cur.home[2] * bd);
+    });
+    var ray = new THREE.Raycaster(), ndc = new THREE.Vector2(), down = null;
+    canvas.addEventListener('pointerdown', function (e) { down = { x: e.clientX, y: e.clientY, t: performance.now() }; });
+    canvas.addEventListener('pointerup', function (e) {
+      if (!down) return;
+      var moved = Math.hypot(e.clientX - down.x, e.clientY - down.y), dt = performance.now() - down.t;
+      down = null;
+      if (moved > 6 || dt > 500) return;
+      var r = canvas.getBoundingClientRect();
+      ndc.set(((e.clientX - r.left) / r.width) * 2 - 1, -((e.clientY - r.top) / r.height) * 2 + 1);
+      ray.setFromCamera(ndc, camera);
+      var hits = ray.intersectObjects(cur.pickables, false), hit = null;
+      for (var i = 0; i < hits.length; i++) {
+        if (cur.L[hits[i].object.userData.layer].fade > 0.5) { hit = hits[i].object.userData.layer; break; }
+      }
+      if (hit) toggleSel(hit); else setSel(null);
+    });
+    function resize() {
+      var w = stage.clientWidth, h = stage.clientHeight;
+      if (!w || !h) return;
+      renderer.setSize(w, h, false);
+      var asp = w / h;
+      camera.aspect = asp;
+      var f = Math.max(1, 0.95 / asp);
+      camera.fov = Math.min(85, 2 * Math.atan(Math.tan(18 * Math.PI / 180) * f) * 180 / Math.PI);
+      camera.updateProjectionMatrix();
+    }
+    if (window.ResizeObserver) new ResizeObserver(resize).observe(stage);
+    window.addEventListener('resize', resize);
+    resize();
+  }
+
+  /* =========================================================
+     Loop
+     ========================================================= */
+  var last = 0, tmp = new THREE.Vector3(), lastAz = -1, lastEx = -1;
+  function place(el, v, w, h) {
+    tmp.copy(v).project(camera);
+    if (tmp.z > 1 || tmp.z < -1) { el.style.visibility = 'hidden'; return; }
+    el.style.visibility = 'visible';
+    el.style.transform = 'translate3d(' + ((tmp.x * 0.5 + 0.5) * w).toFixed(1) + 'px,' + ((-tmp.y * 0.5 + 0.5) * h).toFixed(1) + 'px,0)';
+  }
+  function frame(now) {
+    requestAnimationFrame(frame);
+    var dt = Math.min(0.05, (now - last) / 1000); last = now;
+    var h = cur, k, i, L, d;
+    ex += (exT - ex) * Math.min(1, dt * (reduce ? 30 : 4.5));
+    if (Math.abs(exT - ex) < 0.0005) ex = exT;
+    qa += ((quakeOn ? 1 : 0) - qa) * Math.min(1, dt * 5);
+    var t = now / 1000;
+    var qs = (Math.sin(t * 13.5) + 0.45 * Math.sin(t * 31.7 + 1.3)) / 1.45;
+    var qx = qs * 0.22 * qa;
+    ringG.position.x = qx;
+
+    for (i = 0; i < h.keys.length; i++) {
+      k = h.keys[i]; L = h.L[k]; d = L.def;
+      var b = d.base || [0, 0, 0], e = d.ex || [0, 0, 0], sm = d.selMove || [0, 0, 0];
+      L.sel += ((selected === k ? 1 : 0) - L.sel) * Math.min(1, dt * 6);
+      var q = d.q || null;
+      L.group.position.set(
+        b[0] + e[0] * ex + sm[0] * L.sel + (q ? qx * q.x : 0),
+        b[1] + e[1] * ex + sm[1] * L.sel,
+        b[2] + e[2] * ex + sm[2] * L.sel
+      );
+      L.group.rotation.z = q && q.rz ? qs * qa * q.rz : 0;
+      for (var s = 0; s < L.spreads.length; s++) {
+        var sp = L.spreads[s];
+        sp.obj.position.set(sp.p0.x + sp.dir[0] * ex, sp.p0.y + sp.dir[1] * ex, sp.p0.z + sp.dir[2] * ex);
+      }
+    }
+
+    // kamera mengikuti tinggi model dan bagian terpilih
+    var bd = 1 + h.bd * ex;
+    var wantTy;
+    if (selected) { var sd = h.defs[selected]; wantTy = (sd.base ? sd.base[1] : 0) + sd.cy + (sd.ex ? sd.ex[1] : 0) * ex; }
+    else wantTy = h.ty[0] + (h.ty[1] - h.ty[0]) * ex;
+    var newTy = curTy + (wantTy - curTy) * Math.min(1, dt * 4);
+    var dy = newTy - curTy; curTy = newTy;
+    camera.position.y += dy; controls.target.y = newTy;
+    var ratio = bd / bdPrev; bdPrev = bd;
+    if (Math.abs(ratio - 1) > 1e-6) {
+      tmp.copy(camera.position).sub(controls.target).multiplyScalar(ratio);
+      camera.position.copy(controls.target).add(tmp);
+    }
+    controls.minDistance = h.minD * bd; controls.maxDistance = h.maxD * bd;
+    controls.update();
+    scene.updateMatrixWorld(true);
+
+    // fokus: bagian lain memudar, bagian terpilih bercahaya
+    for (i = 0; i < h.keys.length; i++) {
+      k = h.keys[i]; L = h.L[k];
+      var tgt = (selected === null || selected === k) ? 1 : 0.14;
+      L.fade += (tgt - L.fade) * Math.min(1, dt * 8);
+      var glow = selected === k ? 0.22 : 0;
+      for (var mi = 0; mi < L.mats.length; mi++) {
+        var m = L.mats[mi];
+        var o = m.userData.base * L.fade;
+        var tr = o < 0.995 || !!m.userData.forceT;
+        if (m.transparent !== tr) { m.transparent = tr; m.needsUpdate = true; }
+        m.opacity = o;
+        m.depthWrite = !m.userData.noDepth && L.fade > 0.6;
+        if (m.emissive) m.emissiveIntensity += (glow - m.emissiveIntensity) * Math.min(1, dt * 8);
+      }
+    }
+
+    renderer.render(scene, camera);
+
+    var w = stage.clientWidth, hh = stage.clientHeight;
+    for (i = 0; i < h.keys.length; i++) {
+      k = h.keys[i];
+      h.L[k].anchor.getWorldPosition(tmp);
+      place(h.hs[k], tmp.clone(), w, hh);
+    }
+    cmpEls.forEach(function (c) { place(c.el, c.v, w, hh); });
+
+    var ddx = camera.position.x - controls.target.x, ddz = camera.position.z - controls.target.z;
+    var az = Math.round(Math.atan2(ddx, -ddz) * 180 / Math.PI); if (az < 0) az += 360; if (az === 360) az = 0;
+    var ep = Math.round(ex * 100);
+    if (az !== lastAz || ep !== lastEx) { readout.textContent = 'Sudut ' + az + '° · Terbongkar ' + ep + '%'; lastAz = az; lastEx = ep; }
+  }
+
+  function start() {
+    buildTabs();
+    var hashId = (location.hash || '').replace('#', '');
+    var id = houses[hashId] ? hashId : order[0];
+    try { setupScene(); }
+    catch (e) {
+      $('#fallback').hidden = false;
+      cur = houses[id]; cur.keys = []; assignNumbers(cur);
+      renderCard(null);
+      return;
+    }
+    wire();
+    setHouse(id);
+    requestAnimationFrame(frame);
+  }
+
+  return { register: register, start: start, T: T };
+})();
+/* ===== Joglo (Jawa) ===== */
+(function () {
+  var THREE = App.T.THREE;
+  var GRID = [-4.5, -1.5, 1.5, 4.5];
+  var SAKA = [[-1.5, -1.5], [1.5, -1.5], [-1.5, 1.5], [1.5, 1.5]];
+  var OUTER = [];
+  GRID.forEach(function (x) { GRID.forEach(function (z) { if (Math.abs(x) === 4.5 || Math.abs(z) === 4.5) OUTER.push([x, z]); }); });
+  var FLOOR = [0, 0.75, 0];
+
+  function addUmpak(g, T, x, z, sb, st, h) {
+    var geo = new THREE.CylinderGeometry(st / Math.SQRT2, sb / Math.SQRT2, h, 4, 1);
+    geo.rotateY(Math.PI / 4);
+    var m = new THREE.Mesh(geo, T.m.stone(false));
+    m.position.set(x, h / 2, z);
+    g.add(m);
+  }
+
+  App.register({
+    id: 'joglo', tab: 'Joglo', place: 'Jawa',
+    kicker: 'Joglo · rumah adat Jawa', title: 'Rumah beratap gunungan',
+    paras: [
+      'Nama joglo berasal dari bentuk atapnya yang berbentuk gunungan. Bagian tengah rumah disangga empat tiang utama yang disebut soko guru.',
+      'Secara tradisional joglo dihuni bangsawan atau orang berkedudukan tinggi, dan rumahnya mencerminkan kedudukan pemiliknya.',
+      'Ruang berjajar dari depan ke belakang: pendopo, pringgitan, dalem, lalu senthong.'
+    ],
+    note: 'Model ini menampilkan satu unit dalem berlantai dan berdinding. Pendopo yang terbuka dan pringgitan belum digambar. Ketuk bagian di daftar, penanda bernomor, atau langsung pada model.',
+    srcAll: ['it', 'sin', 'ub'],
+    src: {
+      it: ['Indonesia.travel: Joglo', 'https://www.indonesia.travel/us/en/travel-ideas/heritage/joglo-traditional-house'],
+      sin: ['Sinektika UMS (2014)', 'https://journals.ums.ac.id/sinektika/article/download/1441/989'],
+      ub: ['Repositori UB: Arsitektur Tradisional Jawa', 'https://repository.ub.ac.id/9769/7/BAB%20II.pdf'],
+      jb: ['UIN Alauddin: Joglo Bucu', 'https://journal.uin-alauddin.ac.id/index.php/nucturenature/article/download/33696/17379'],
+      jc: ['Jogja Cagar: Joglo Suyadi', 'https://jogjacagar.jogjaprov.go.id/detail/4046/rumah-joglo-milik-suyadi'],
+      gn: ['Good News from Indonesia', 'https://www.goodnewsfromindonesia.id/2026/07/24/struktur-rumah-joglo-fungsinya']
+    },
+    list1: 'Struktur, disusun dari bawah ke atas', list2: 'Ruang',
+    home: [14, 7, 16], ty: [4.6, 10.8], bd: 0.85, minD: 9, maxD: 60, ringR: 10.4,
+    layers: [
+      {
+        key: 'batur', name: 'Baturan & lantai', sub: 'Alas rumah yang ditinggikan',
+        kicker: 'Bagian 1 · dasar', anchor: [0, 0.3, 5.7], cy: 0.35, base: [0, 0, 0], ex: [0, 0, 0],
+        paras: [
+          'Di struktur bawah, umpak berpasangan dengan baturan. Pada rumah Joglo milik Suyadi di Sleman, pondasinya ditinggikan 111,5 cm dari permukaan tanah.',
+          'Lantainya bertingkat. Lantai pendopo 40 sampai 50 cm lebih tinggi daripada emper, dan lantai dalem lebih tinggi lagi daripada pendopo dan pringgitan.',
+          'Emper atau teras umumnya selebar sekitar 2 meter.'
+        ],
+        note: 'Catatan model: baturan dan lantai digambar sebagai dua undakan polos. Bahan lantai pada contoh Sleman berupa plester semen dan tegel.',
+        src: ['ub', 'sin', 'jb', 'jc'],
+        build: function (g, T) {
+          g.add(T.box(12.6, 0.3, 12.6, T.m.stone(true), 0, 0.15, 0));
+          g.add(T.box(9.9, 0.42, 9.9, T.m.stone(false), 0, 0.51, 0));
+          g.add(T.box(9.9, 0.03, 9.9, T.m.map(T.tex.tile(7, 7)), 0, 0.735, 0));
+        }
+      },
+      {
+        key: 'umpak', name: 'Umpak', sub: 'Batu alas tiang',
+        kicker: 'Bagian 2 · alas tiang', anchor: [5.1, 0.5, 5.1], cy: 0.25, base: FLOOR, ex: [0, 0.6, 0],
+        paras: [
+          'Umpak adalah alas soko guru dan menahan gaya vertikal. Bahannya umumnya batu alam, supaya kayu tidak menyentuh tanah dan cepat lapuk akibat air atau rayap.',
+          'Umpak soko guru sering berhias padma, bunga teratai yang melambangkan kekokohan, kekuatan, dan kesucian. Contoh di Sleman: umpak soko guru pendopo berbentuk teratai dari batu berukuran 30 × 32 × 27 cm.',
+          'Menurut kajian Subiyantoro (2011) yang dikutip Good News from Indonesia, atap, tiang, dan umpak mewakili dunia atas, tengah, dan bawah.'
+        ],
+        note: 'Catatan model: padma digambar sebagai delapan kelopak kecil di sekeliling tiang.',
+        src: ['ub', 'jb', 'jc', 'gn'],
+        build: function (g, T) {
+          SAKA.forEach(function (p) { addUmpak(g, T, p[0], p[1], 1.1, 0.7, 0.5); });
+          OUTER.forEach(function (p) { addUmpak(g, T, p[0], p[1], 0.8, 0.52, 0.4); });
+          var padma = T.m.gold();
+          var pg = new THREE.SphereGeometry(1, 10, 8);
+          SAKA.forEach(function (p) {
+            for (var i = 0; i < 8; i++) {
+              var a = i / 8 * Math.PI * 2;
+              var petal = new THREE.Mesh(pg, padma);
+              petal.scale.set(0.13, 0.035, 0.055);
+              petal.position.set(p[0] + Math.cos(a) * 0.27, 0.52, p[1] + Math.sin(a) * 0.27);
+              petal.rotation.y = -a;
+              g.add(petal);
+            }
+          });
+        }
+      },
+      {
+        key: 'saka', name: 'Soko guru', sub: 'Empat tiang utama',
+        kicker: 'Bagian 3 · tiang', anchor: [1.85, 2.9, 1.85], cy: 2.7, base: FLOOR, ex: [0, 1.9, 0],
+        paras: [
+          'Empat tiang kayu menopang bagian tengah rumah, dan stabilitas struktur berpusat pada sistem soko guru. Bahannya umumnya kayu jati atau nangka.',
+          'Keempat tiang ini melambangkan empat arah mata angin. Bagian tengahnya dikaitkan dengan konsep ketuhanan.',
+          'Ukurannya beragam. Pada rumah di Sleman, soko guru dalem berukuran 15 × 15 cm dan soko guru pendopo 17,8 × 18,6 cm.'
+        ],
+        note: 'Catatan model: selain 4 soko guru ada 12 tiang tepi yang menggambarkan emper. Jumlah dan letaknya berbeda-beda; rumah di Sleman punya 6 saka emper.',
+        src: ['ub', 'sin', 'jb', 'jc', 'it'],
+        build: function (g, T) {
+          SAKA.forEach(function (p) {
+            g.add(T.box(0.5, 4.4, 0.5, T.m.wood('teak', false), p[0], 0.5 + 2.2, p[1]));
+            g.add(T.box(0.66, 0.16, 0.66, T.m.gold(), p[0], 4.82, p[1]));
+          });
+          OUTER.forEach(function (p) { g.add(T.box(0.34, 2.6, 0.34, T.m.wood('teak', false), p[0], 0.4 + 1.3, p[1])); });
+        }
+      },
+      {
+        key: 'dinding', name: 'Dinding gebyok', sub: 'Pembatas ruang dalem',
+        kicker: 'Bagian 4 · dinding', anchor: [0.6, 1.2, 1.9], cy: 1.5, base: FLOOR, ex: [0, 0, 0],
+        paras: [
+          'Dinding joglo berupa gebyok, yaitu dinding kayu semi permanen yang membatasi pringgitan dan dalem ageng. Ruang publik seperti pendopo justru memakai dinding terbuka atau tiang saja.',
+          'Pada rumah Joglo di Sleman, bagian depan dalem berupa gebyok dengan tiga pasang pintu kupu tarung. Bingkai pintu dan gebyok sering berukir patran, motif daun yang tersusun berjajar.',
+          'Pintu masuk dalem sengaja dibuat rendah sebagai penghormatan kepada pemilik rumah.'
+        ],
+        note: 'Catatan model: dinding samping dan belakang digambar polos, ukiran belum digambar. Lubang berjeruji di atas pintu mengikuti tebeng pada contoh Sleman.',
+        src: ['ub', 'sin', 'jb', 'jc'],
+        build: function (g, T, L) {
+          var W = function () { return T.m.wood('teak', false); };
+          var back = new THREE.Group(); g.add(back);
+          back.add(T.box(2.5, 3.0, 0.2, W(), 0, 1.5, -1.5));
+          T.spread(L, back, [0, 0, -3.4]);
+          [-1, 1].forEach(function (s) {
+            var side = new THREE.Group(); g.add(side);
+            side.add(T.box(0.2, 3.0, 2.5, W(), s * 1.5, 1.5, 0));
+            T.spread(L, side, [s * 3.4, 0, 0]);
+          });
+          var front = new THREE.Group(); g.add(front);
+          front.add(T.box(2.5, 1.85, 0.12, T.m.plain(0x2b1a10), 0, 0.93, 1.5));
+          for (var i = 0; i < 6; i++) front.add(T.box(0.38, 1.72, 0.1, T.m.wood('teak', false), -1.0 + 0.4 * i, 0.91, 1.58));
+          [-0.8, 0, 0.8].forEach(function (x) { front.add(T.box(0.035, 1.72, 0.03, T.m.gold(), x, 0.91, 1.65)); });
+          front.add(T.box(2.5, 0.14, 0.2, W(), 0, 1.92, 1.5));
+          for (var s2 = 0; s2 < 8; s2++) front.add(T.box(0.14, 1.0, 0.14, W(), -1.1 + 0.314 * s2, 2.5, 1.5));
+          front.add(T.box(2.5, 0.12, 0.2, W(), 0, 3.0, 1.5));
+          T.spread(L, front, [0, 0, 3.4]);
+          var sen = new THREE.Group(); g.add(sen);
+          [-0.42, 0.42].forEach(function (x) { sen.add(T.box(0.1, 3.0, 1.0, W(), x, 1.5, -0.9)); });
+          sen.add(T.box(0.78, 1.9, 0.1, W(), -0.84, 0.95, -0.4));
+          sen.add(T.box(0.78, 1.9, 0.1, T.m.gold(), 0, 0.95, -0.4));
+          sen.add(T.box(0.78, 1.9, 0.1, W(), 0.84, 0.95, -0.4));
+          sen.add(T.box(2.5, 1.1, 0.1, W(), 0, 2.45, -0.4));
+          T.spread(L, sen, [0, 0, -1.8]);
+        }
+      },
+      {
+        key: 'beams', name: 'Balok pengunci', sub: 'Blandar, pengerat, sunduk, kili',
+        kicker: 'Bagian 5 · sambungan', anchor: [0, 5.1, 1.95], cy: 4.1, base: FLOOR, ex: [0, 4.4, 0],
+        paras: [
+          'Blandar, juga disebut pengerat, menopang tumpang sari. Sunduk dan kili membentuk sambungan kaku dengan soko guru.',
+          'Struktur vertikal joglo dikelompokkan menjadi tiga bagian: atas (mala dan ander), tengah (tumpang sari, sunduk, kili, dan soko guru), serta bawah (umpak dan baturan).'
+        ],
+        note: 'Catatan model: balok digambar sebagai kerangka sederhana tanpa sambungan, dan posisi tiap balok tidak persis seperti rumah asli. Mala dan ander belum digambar.',
+        src: ['ub'],
+        build: function (g, T) {
+          var B = function () { return T.m.wood('teak', true); };
+          g.add(T.box(9.8, 0.36, 0.38, B(), 0, 3.18, -4.5));
+          g.add(T.box(9.8, 0.36, 0.38, B(), 0, 3.18, 4.5));
+          g.add(T.box(0.38, 0.36, 9.8, B(), -4.5, 3.54, 0));
+          g.add(T.box(0.38, 0.36, 9.8, B(), 4.5, 3.54, 0));
+          g.add(T.box(9.8, 0.36, 0.38, B(), 0, 3.18, -1.5));
+          g.add(T.box(9.8, 0.36, 0.38, B(), 0, 3.18, 1.5));
+          g.add(T.box(0.38, 0.36, 9.8, B(), -1.5, 3.54, 0));
+          g.add(T.box(0.38, 0.36, 9.8, B(), 1.5, 3.54, 0));
+          g.add(T.box(4.0, 0.34, 0.4, B(), 0, 4.2, -1.5));
+          g.add(T.box(4.0, 0.34, 0.4, B(), 0, 4.2, 1.5));
+          g.add(T.box(0.4, 0.34, 4.0, B(), -1.5, 4.56, 0));
+          g.add(T.box(0.4, 0.34, 4.0, B(), 1.5, 4.56, 0));
+          g.add(T.box(4.1, 0.36, 0.42, B(), 0, 5.08, -1.5));
+          g.add(T.box(4.1, 0.36, 0.42, B(), 0, 5.08, 1.5));
+          g.add(T.box(0.42, 0.36, 4.1, B(), -1.5, 5.44, 0));
+          g.add(T.box(0.42, 0.36, 4.1, B(), 1.5, 5.44, 0));
+        }
+      },
+      {
+        key: 'tumpang', name: 'Tumpang sari', sub: 'Balok bertingkat di atas tiang',
+        kicker: 'Bagian 6 · penopang atap', anchor: [2.35, 6.35, 2.35], cy: 6.3, base: FLOOR, ex: [0, 6.9, 0],
+        paras: [
+          'Tumpang sari adalah susunan balok kayu bertingkat yang disangga soko guru, dipasang di atas blandar dan berbentuk mengerucut.',
+          'Tingkat-tingkatnya dimaknai sebagai tahapan syariat, tarekat, hakekat, dan makrifat.',
+          'Tumpang sari menjadi pembeda utama joglo dari rumah limasan.'
+        ],
+        note: 'Catatan model: digambar enam tingkat, selang-seling kayu dan emas sebagai gambaran ornamen.',
+        src: ['ub', 'sin', 'gn', 'jb'],
+        build: function (g, T) {
+          for (var k = 0; k < 6; k++) {
+            var s = 3.4 + 0.2 * k, t = 0.34, hh = 0.2, y = 5.8 + k * 0.21;
+            var mm = k % 2 === 0 ? function () { return T.m.wood('teak', false); } : function () { return T.m.gold(); };
+            g.add(T.box(s, hh, t, mm(), 0, y, -(s / 2 - t / 2)));
+            g.add(T.box(s, hh, t, mm(), 0, y, (s / 2 - t / 2)));
+            g.add(T.box(t, hh, s - 2 * t, mm(), -(s / 2 - t / 2), y, 0));
+            g.add(T.box(t, hh, s - 2 * t, mm(), (s / 2 - t / 2), y, 0));
+          }
+        }
+      },
+      {
+        key: 'roof', name: 'Atap joglo', sub: 'Atap gunungan',
+        kicker: 'Bagian 7 · penutup', anchor: [0, 6.9, 2.65], cy: 6.2, base: FLOOR, ex: [0, 11, 0],
+        paras: [
+          'Atap joglo berbentuk piramida bersisi empat yang disebut gunungan, melambangkan keselarasan dan keseimbangan. Dari bentuk inilah nama joglo berasal.',
+          'Joglo adalah salah satu dari tiga jenis atap utama rumah Jawa, bersama limasan dan kampung, dan secara tradisional dikaitkan dengan kediaman bangsawan.',
+          'Atap juga cara beradaptasi dengan iklim tropis. Pada rumah di Sleman, puncak atap pendopo diberi mustaka berbentuk garuda dan penutupnya genteng tanah liat.'
+        ],
+        note: 'Catatan model: puncak digambar sebagai bubungan pendek dengan mustaka sederhana.',
+        src: ['it', 'sin', 'jc'],
+        build: function (g, T) {
+          var lower = new THREE.Mesh(T.frustum(6.2, 6.2, 4.6, 4.6, 1.6), T.m.roof('tile'));
+          lower.position.y = 3.0; g.add(lower);
+          var upper = new THREE.Mesh(T.frustum(4.6, 4.6, 1.8, 0.45, 4.6), T.m.roof('tile'));
+          upper.position.y = 4.6; g.add(upper);
+          g.add(T.box(4.2, 0.3, 1.2, T.m.plain(0x3d1b14), 0, 9.3, 0));
+          g.add(T.cyl(0.03, 0.2, 0.9, 12, T.m.gold(), 0, 9.9, 0));
+          var ball = new THREE.Mesh(new THREE.SphereGeometry(0.2, 12, 10), T.m.gold());
+          ball.position.set(0, 9.5, 0); g.add(ball);
+        }
+      },
+      {
+        key: 'dalem', space: true, n: 'D', name: 'Dalem', sub: 'Ruang keluarga di pusat rumah',
+        kicker: 'Ruang · pusat rumah', anchor: [0, 0.2, 0.5], cy: 0.6, base: FLOOR, ex: [0, 0, 0],
+        paras: [
+          'Dalem (disebut juga omah njero) adalah ruang keluarga di pusat rumah dan bersifat privat. Pintu masuknya dibuat rendah sebagai penghormatan kepada pemilik rumah.',
+          'Ruang yang dibentuk oleh empat soko guru disebut rong-rongan.',
+          'Lantai dalem lebih tinggi daripada pendopo dan pringgitan.'
+        ],
+        note: 'Catatan model: bidang emas di lantai menandai dalem, dan kolom tipis muncul saat dipilih.',
+        src: ['sin', 'ub', 'jb'],
+        build: function (g, T, L) { T.zone(L, { y: 0.06, cells: [{ w: 2.4, d: 1.7, x: 0, z: 0.5 }], vol: [2.6, 4.4, 2.6, 0, 0] }); }
+      },
+      {
+        key: 'senthong', space: true, n: 'S', name: 'Senthong', sub: 'Tiga ruang di bagian belakang',
+        kicker: 'Ruang · bagian terdalam', anchor: [0, 0.2, -0.9], cy: 0.6, base: FLOOR, ex: [0, 0, 0],
+        paras: [
+          'Dalem ageng punya tiga senthong: kiwa (kiri), tengah, dan tengen (kanan).',
+          'Senthong tengah, atau krobongan, paling dalam dan bersifat sakral. Ruang ini dipakai untuk pemujaan Dewi Sri dan meditasi.',
+          'Senthong kiri dan kanan dipakai untuk kamar tidur serta menyimpan harta atau pusaka.'
+        ],
+        note: 'Catatan model: tiga senthong digambar sebagai tiga bilik di belakang dalem. Bilik tengah diberi warna lebih pekat.',
+        src: ['sin', 'ub', 'jb', 'it'],
+        build: function (g, T, L) {
+          T.zone(L, { y: 0.06, cells: [
+            { w: 0.78, d: 0.95, x: -0.84, z: -0.9, a: 0.14 },
+            { w: 0.78, d: 0.95, x: 0, z: -0.9, a: 0.34 },
+            { w: 0.78, d: 0.95, x: 0.84, z: -0.9, a: 0.14 }
+          ] });
+        }
+      }
+    ]
+  });
+})();
+/* ===== Omo Sebua (Nias) ===== */
+(function () {
+  var THREE = App.T.THREE;
+  var PX = [-2.7, -0.9, 0.9, 2.7];
+  var PZ = [-4.5, -1.5, 1.5, 4.5];
+
+  App.register({
+    id: 'omo', tab: 'Omo Sebua', place: 'Nias',
+    kicker: 'Omo Sebua · rumah adat Nias', title: 'Rumah panggung tanpa paku',
+    paras: [
+      'Omo Sebua dibangun untuk kepala desa dan berdiri di pusat desa. Tingginya bisa mencapai 16 meter, dengan atap yang menjulang.',
+      'Rumah adat Nias dibangun tanpa paku dan bertumpu di atas lempengan batu, tanpa tiang yang ditanam ke tanah. Kombinasi ini dikaitkan dengan ketahanannya terhadap gempa.',
+      'Dahulu rumah ini juga berfungsi sebagai tempat pertahanan saat perang. Pembangunannya memakan waktu hingga empat tahun dan hanya dikerjakan oleh para ahli.'
+    ],
+    note: 'Tekan Simulasi gempa untuk melihat gambaran geraknya. Itu ilustrasi untuk membantu membayangkan, bukan simulasi teknik. Ketuk bagian di daftar atau pada model untuk membaca detailnya.',
+    srcAll: ['sl', 'dt', 'np'],
+    src: {
+      sl: ['Selasar: Rumah adat Nias', 'https://www.selasar.com/rumah-adat/nias/'],
+      dt: ['detikTravel: Rumah adat Nias tahan gempa', 'https://travel.detik.com/travel-news/d-7093247/rahasia-di-balik-rumah-adat-nias-yang-tahan-gempa'],
+      np: ['Nawacita Post: Omo Hada', 'https://www.nawacitapost.com/nasional/27352953/mengungkap-rahasia-omo-hada-rumah-tradisional-di-nias-pulau-impian-yang-tahan-gempa']
+    },
+    list1: 'Struktur, disusun dari bawah ke atas', list2: 'Akses',
+    quake: true,
+    home: [15, 8, 19], ty: [6.2, 11.2], bd: 0.62, minD: 10, maxD: 70, ringR: 10.4,
+    layers: [
+      {
+        key: 'batu', name: 'Lempeng batu', sub: 'Alas tiang yang tidak tertanam',
+        kicker: 'Bagian 1 · dasar', anchor: [3.5, 0.3, 5.4], cy: 0.25, base: [0, 0, 0], ex: [0, 0, 0], q: { x: 1 },
+        paras: [
+          'Tiang rumah adat Nias tidak dipancang ke dalam tanah. Semuanya berdiri di atas lempengan batu.',
+          'Lempengan batu itu menjadi alas tiang vertikal maupun diagonal, dan menambah kestabilan rumah.'
+        ],
+        note: 'Catatan model: 16 lempeng polos. Ukuran dan bentuk batu asli tidak disebut dalam sumber.',
+        src: ['dt', 'np', 'sl'],
+        build: function (g, T) {
+          var i = 0;
+          PX.forEach(function (x) { PZ.forEach(function (z) {
+            var m = T.box(1.0, 0.25, 1.0, T.m.stone(i % 2 === 0), x, 0.125, z);
+            m.rotation.y = ((i * 37) % 7 - 3) * 0.03; i++; g.add(m);
+          }); });
+        }
+      },
+      {
+        key: 'tiang', name: 'Tiang & ndriwa', sub: 'Penyokong diagonal di bawah rumah',
+        kicker: 'Bagian 2 · penopang', anchor: [3.1, 1.8, 4.9], cy: 1.9, base: [0, 0, 0], ex: [0, 1.0, 0], q: { x: 1, rz: 0.048 },
+        paras: [
+          'Ndriwa adalah penyokong diagonal yang dipasang di antara tiang-tiang vertikal di bawah rumah. Sumber menyebutnya fitur utama penahan gempa.',
+          'Kombinasi ndriwa dan tiang di atas lempengan batu membuat struktur kuat sekaligus fleksibel, sehingga mampu menahan getaran gempa.',
+          'Omo Sebua berdiri di atas tiang kayu ulin yang besar. Di Nias Selatan, jumlah tiang deret depan genap, yaitu 4 atau 6.'
+        ],
+        note: 'Catatan model: 16 tiang dalam 4 deret, dengan penyokong diagonal ke empat arah. Jumlah dan sudut ndriwa asli tidak disebut dalam sumber.',
+        src: ['dt', 'sl', 'np'],
+        build: function (g, T) {
+          var U = function () { return T.m.wood('ulin', false); };
+          PX.forEach(function (x) { PZ.forEach(function (z) { g.add(T.box(0.5, 2.95, 0.5, U(), x, 0.25 + 1.475, z)); }); });
+          PX.forEach(function (x) { g.add(T.box(0.3, 0.3, 10.8, T.m.wood('ulin', true), x, 3.3, 0)); });
+          PZ.forEach(function (z) { g.add(T.box(6.2, 0.3, 0.3, T.m.wood('ulin', true), 0, 3.0, z)); });
+          var i;
+          [PZ[0], PZ[3]].forEach(function (z) {
+            for (i = 0; i < 3; i++) {
+              g.add(T.strut([PX[i], 0.4, z], [PX[i + 1], 2.85, z], 0.2, U()));
+              g.add(T.strut([PX[i + 1], 0.4, z], [PX[i], 2.85, z], 0.2, U()));
+            }
+          });
+          [PX[0], PX[3]].forEach(function (x) {
+            for (i = 0; i < 3; i++) {
+              g.add(T.strut([x, 0.4, PZ[i]], [x, 2.85, PZ[i + 1]], 0.2, U()));
+              g.add(T.strut([x, 0.4, PZ[i + 1]], [x, 2.85, PZ[i]], 0.2, U()));
+            }
+          });
+        }
+      },
+      {
+        key: 'lantai', name: 'Lantai & dinding', sub: 'Dinding condong ke luar',
+        kicker: 'Bagian 3 · badan rumah', anchor: [3.8, 4.9, 4.6], cy: 4.9, base: [0, 0, 0], ex: [0, 2.4, 0], q: { x: 0.25 },
+        paras: [
+          'Rumah dibuat tinggi dan condong ke luar sebagai bagian dari rancangan pertahanan.',
+          'Di Nias Selatan, hanya rumah bangsawan yang punya ukiran rumit pada panel dindingnya. Tengkorak babi dipasang sebagai dekorasi Omo Sebua hingga kini.',
+          'Ruang besar berada di depan, dan kamar tidur kecil di belakang.'
+        ],
+        note: 'Catatan model: ukiran digambar sebagai pola geometris, tengkorak babi sebagai bola kecil, dan pembagian ruang dalam belum digambar.',
+        src: ['sl', 'dt'],
+        build: function (g, T) {
+          g.add(T.box(7.2, 0.3, 11.0, T.m.wood('ulin', true), 0, 3.6, 0));
+          var cm = T.tex.carve('nias').clone(); cm.needsUpdate = true; cm.repeat.set(3.5, 1.2);
+          var front = new THREE.Group(); front.position.set(0, 3.75, 5.4); front.rotation.x = 0.08; g.add(front);
+          front.add(T.box(7.0, 2.4, 0.2, T.m.map(cm), 0, 1.2, 0));
+          front.add(T.box(0.9, 1.7, 0.06, T.m.plain(0x1b120a), 0, 0.95, 0.12));
+          var sk = new THREE.SphereGeometry(0.17, 10, 8);
+          for (var i = 0; i < 6; i++) {
+            var s = new THREE.Mesh(sk, T.m.plain(0xe9e1cc, 0.7));
+            s.scale.set(1, 0.85, 1.1); s.position.set(-2.5 + i * 1.0, 2.05, 0.2);
+            if (Math.abs(-2.5 + i) < 0.5) s.position.x += 0; front.add(s);
+          }
+          var back = new THREE.Group(); back.position.set(0, 3.75, -5.4); back.rotation.x = -0.08; g.add(back);
+          back.add(T.box(7.0, 2.4, 0.2, T.m.wood('ulin', false), 0, 1.2, 0));
+          [-1, 1].forEach(function (sx) {
+            var side = new THREE.Group(); side.position.set(sx * 3.5, 3.75, 0); side.rotation.z = -sx * 0.08; g.add(side);
+            side.add(T.box(0.2, 2.4, 10.8, T.m.wood('ulin', false), 0, 1.2, 0));
+          });
+        }
+      },
+      {
+        key: 'rangka', name: 'Rangka atap', sub: 'Balok vertikal dan diagonal',
+        kicker: 'Bagian 4 · rangka', anchor: [0, 9.0, 3.0], cy: 9.0, base: [0, 0, 0], ex: [0, 3.2, 0], q: { x: 0.25 },
+        paras: [
+          'Omo Sebua tidak punya plafon dalam. Balok vertikal dan diagonal menahan atap, dan ruang di antaranya dipakai untuk menyimpan peralatan rumah tangga.',
+          'Seluruh bahan bangunan adalah kayu yang disambung tanpa paku.'
+        ],
+        note: 'Catatan model: rangka digambar sederhana. Detail sambungan kayu asli tidak disebut dalam sumber.',
+        src: ['sl', 'dt'],
+        build: function (g, T) {
+          var U = function () { return T.m.wood('ulin', true); };
+          [-5.4, 5.4].forEach(function (z) { g.add(T.box(7.4, 0.3, 0.3, U(), 0, 6.2, z)); });
+          [-3.5, 3.5].forEach(function (x) { g.add(T.box(0.3, 0.3, 11.0, U(), x, 6.2, 0)); });
+          [-2.6, 2.6].forEach(function (z) { g.add(T.box(0.3, 5.8, 0.3, T.m.wood('ulin', false), 0, 9.1, z)); });
+          g.add(T.box(0.3, 0.3, 5.8, U(), 0, 12.1, 0));
+          [-5.4, 5.4].forEach(function (z) { [-3.5, 3.5].forEach(function (x) { g.add(T.strut([x, 6.2, z], [0, 12.1, z > 0 ? 2.9 : -2.9], 0.22, U())); }); });
+          [-3.5, 3.5].forEach(function (x) { g.add(T.strut([x, 6.2, 0], [0, 12.1, 0], 0.22, U())); });
+          [-2.6, 2.6].forEach(function (z) { [-3.5, 3.5].forEach(function (x) { g.add(T.strut([x, 6.2, z], [0, 9.0, z], 0.18, U())); }); });
+        }
+      },
+      {
+        key: 'atap', name: 'Atap rumbia', sub: 'Atap yang menjulang',
+        kicker: 'Bagian 5 · penutup', anchor: [0, 10.0, 4.6], cy: 9.3, base: [0, 0, 0], ex: [0, 9.6, 0], q: { x: 0.25 },
+        paras: [
+          'Atap Omo Sebua menjulang tinggi dan dilapisi daun rumbia.',
+          'Ada bukaan ventilasi di bagian atap depan.',
+          'Bagian depan yang melengkung disebut ewe atau sikholi di Nias Selatan.'
+        ],
+        note: 'Catatan model: bentuk atap disederhanakan, dan lengkung ewe belum digambar.',
+        src: ['sl', 'dt'],
+        build: function (g, T) {
+          var roof = new THREE.Mesh(T.frustum(4.6, 6.6, 0.3, 3.0, 6.8), T.m.roof('rumbia'));
+          roof.position.y = 5.9; g.add(roof);
+          g.add(T.box(0.5, 0.3, 6.3, T.m.plain(0x3a2a14), 0, 12.8, 0));
+          var vent = T.box(1.6, 0.9, 0.1, T.m.plain(0x1b120a), 0, 10.2, 4.38);
+          vent.rotation.x = -0.49; g.add(vent);
+        }
+      },
+      {
+        key: 'tangga', space: true, n: 'T', name: 'Tangga', sub: 'Satu-satunya jalan masuk',
+        kicker: 'Akses · pertahanan', anchor: [0, 2.4, 7.0], cy: 2.4, base: [0, 0, 0], ex: [0, 0.8, 3.2], q: { x: 0.6 }, selMove: [0, 0, 2.2],
+        paras: [
+          'Tangga sempit menjadi satu-satunya akses masuk ke Omo Sebua.',
+          'Tangganya dapat digeser, bagian dari rancangan pertahanan rumah. Pilih bagian ini untuk melihat tangga bergeser.'
+        ],
+        note: 'Catatan model: jumlah anak tangga dan sudutnya hanya gambaran.',
+        src: ['sl'],
+        build: function (g, T) {
+          var U = function () { return T.m.wood('ulin', false); };
+          [-0.42, 0.42].forEach(function (x) { g.add(T.strut([x, 0.15, 7.9], [x, 3.75, 5.6], 0.14, U())); });
+          for (var i = 0; i < 9; i++) {
+            var t = (i + 0.5) / 9;
+            g.add(T.box(0.9, 0.1, 0.34, U(), 0, 0.15 + 3.6 * t, 7.9 - 2.3 * t));
+          }
+        }
+      }
+    ]
+  });
+})();
+/* ===== Tongkonan (Toraja) ===== */
+(function () {
+  var THREE = App.T.THREE;
+  var Z0 = 4.5; // geser seluruh rumah agar rumah dan alang berimbang di tengah
+  var BASE = [0, 0, Z0];
+  var PCOLS = [-1.8, 0, 1.8];
+  var PROWS = [-3.6, -1.8, 0, 1.8, 3.6];
+  function eave(t) { return 5.0 + 2.2 * t * t; }
+  function ridge(t) { return eave(t) + 1.5 + 1.3 * t * t; }
+
+  function carveMat(T, rx, ry) {
+    var t = T.tex.carve('toraja').clone(); t.needsUpdate = true; t.repeat.set(rx, ry);
+    return T.m.map(t);
+  }
+
+  App.register({
+    id: 'tongkonan', tab: 'Tongkonan', place: 'Toraja',
+    kicker: 'Tongkonan · rumah adat Toraja', title: 'Rumah beratap perahu',
+    paras: [
+      'Tongkonan adalah rumah panggung kayu dengan atap melengkung seperti perahu telungkup. Lengkungnya juga disebut mirip tanduk kerbau.',
+      'Rumah terdiri dari tiga bagian: ulu banua (atap), kalle banua (badan), dan sulluk banua (kaki).',
+      'Tongkonan menghadap utara. Di seberang halaman berdiri alang, lumbung padi yang menghadap selatan.'
+    ],
+    note: 'Seluruh rumah dibangun di atas satu sumbu utara-selatan. Ketuk bagian di daftar, penanda bernomor, atau langsung pada model.',
+    srcAll: ['bi', 'mn', 'km', 'uj'],
+    src: {
+      bi: ['Budaya-Indonesia.org: Tongkonan', 'https://budaya-indonesia.org/4-Tongkonan'],
+      mn: ['Museum Nasional: Rumah Adat Tongkonan', 'https://museumnasional.iheritage-virtual.id/collection/detail/55'],
+      km: ['Kumparan: Makna simbolik rumah adat Toraja', 'https://kumparan.com/hendro-ari-gunawan/makna-simbolik-pada-rumah-adat-toraja-dari-setiap-bagiannya-26KAuy9YmJy'],
+      uj: ['Universitas Jember: Rumah Tongkonan', 'https://tamankebangsaan.unej.ac.id/rto']
+    },
+    list1: 'Struktur, disusun dari bawah ke atas', list2: 'Ruang & pasangan rumah',
+    home: [16, 9, -20], ty: [5.0, 8.8], bd: 0.55, minD: 10, maxD: 80, ringR: 13,
+    layers: [
+      {
+        key: 'kaki', name: 'Kaki (sulluk banua)', sub: 'Pondasi batu dan kolong',
+        kicker: 'Bagian 1 · kaki', anchor: [2.6, 1.2, 3.6], cy: 1.3, base: BASE, ex: [0, 0, 0],
+        paras: [
+          'Tongkonan berdiri di atas pondasi batu. Bagian kakinya disebut sulluk banua.',
+          'Kolong biasanya dipakai sebagai kandang kerbau atau babi dan tidak punya fungsi religius.'
+        ],
+        note: 'Catatan model: 15 tiang di atas 15 batu. Jumlah dan ukuran tiang asli tidak disebut dalam sumber.',
+        src: ['bi', 'mn'],
+        build: function (g, T) {
+          PCOLS.forEach(function (x) { PROWS.forEach(function (z) {
+            g.add(T.box(0.8, 0.35, 0.8, T.m.stone(false), x, 0.175, z));
+            g.add(T.box(0.36, 2.05, 0.36, T.m.wood('nangka', false), x, 0.35 + 1.025, z));
+          }); });
+        }
+      },
+      {
+        key: 'badan', name: 'Lantai & badan (kalle banua)', sub: 'Rumah panggung kayu',
+        kicker: 'Bagian 2 · badan rumah', anchor: [2.5, 3.8, 3.0], cy: 3.8, base: BASE, ex: [0, 1.6, 0],
+        paras: [
+          'Badan rumah disebut kalle banua. Seluruh rumah berkonstruksi rangka kayu dan berdenah persegi.',
+          'Ruang di dalamnya berderet dari utara ke selatan: tangalok, sali, dan sumbung.',
+          'Pembangunannya biasanya dibantu keluarga besar, dan rumah dihuni seluruh keturunan kerabat pembangunnya.'
+        ],
+        note: 'Catatan model: dinding digambar polos. Jendela dan pintu belum digambar.',
+        src: ['bi', 'uj', 'mn'],
+        build: function (g, T) {
+          var W = function () { return T.m.wood('nangka', false); };
+          g.add(T.box(4.8, 0.3, 8.6, T.m.wood('nangka', true), 0, 2.55, 0));
+          g.add(T.box(4.6, 2.2, 0.2, W(), 0, 3.8, -4.2));
+          g.add(T.box(4.6, 2.2, 0.2, W(), 0, 3.8, 4.2));
+          g.add(T.box(0.2, 2.2, 8.4, W(), -2.3, 3.8, 0));
+          g.add(T.box(0.2, 2.2, 8.4, W(), 2.3, 3.8, 0));
+        }
+      },
+      {
+        key: 'ukiran', name: 'Ukiran', sub: 'Motif dan warna Toraja',
+        kicker: 'Bagian 3 · hiasan', anchor: [2.5, 4.4, -2.5], cy: 4.4, base: BASE, ex: [0, 1.6, 0],
+        paras: [
+          'Menurut J.S. Sande, ada sekitar 67 motif ukiran Toraja.',
+          'Warna dominannya merah, kuning, putih, dan hitam. Merah, kuning, dan putih berasal dari tanah liat litak, sedangkan hitam dari jelaga.',
+          'Ukiran menggambarkan kepercayaan dan adat Toraja. Tidak semua rumah berukir, dan motif tertentu mengikuti aturan adat.'
+        ],
+        note: 'Catatan model: motif digambar geometris sebagai gambaran warna. Belum meniru motif tertentu.',
+        src: ['uj', 'bi', 'km', 'mn'],
+        build: function (g, T, L) {
+          [-1, 1].forEach(function (s) {
+            var side = new THREE.Group(); g.add(side);
+            side.add(T.box(0.06, 2.0, 7.8, carveMat(T, 3, 1), s * 2.43, 3.8, 0));
+            T.spread(L, side, [s * 1.8, 0, 0]);
+            var gab = T.gable([[-2.3, 4.9], [2.3, 4.9], [2.3, 6.76], [0, 8.47], [-2.3, 6.76]], 0.12, carveMat(T, 0.3, 0.3));
+            gab.position.z = s * 4.2; g.add(gab);
+            T.spread(L, gab, [0, 0, s * 1.8]);
+          });
+        }
+      },
+      {
+        key: 'tanduk', name: 'Tiang depan & tanduk', sub: 'Tulak somba',
+        kicker: 'Bagian 4 · penanda status', anchor: [0.9, 6.4, -5.4], cy: 6.4, base: BASE, ex: [0, 0, -2.6],
+        paras: [
+          'Tiang penyangga atap di depan rumah disebut tulak somba. Susunan tanduk kerbau digantung padanya.',
+          'Tanduk berasal dari upacara Rambu Solo, upacara kematian. Semakin banyak tanduk, semakin tinggi status sosial pemilik.',
+          'Rahang hewan kurban juga dipasang: rahang kerbau di sisi kiri dan rahang babi di sisi kanan.'
+        ],
+        note: 'Catatan model: enam pasang tanduk digambar sebagai hiasan, rahang belum digambar. Jumlah tanduk asli mengikuti riwayat upacara pemiliknya.',
+        src: ['mn', 'uj', 'km'],
+        build: function (g, T) {
+          g.add(T.box(0.5, 0.3, 0.5, T.m.stone(false), 0, 0.15, -5.2));
+          g.add(T.box(0.42, 9.2, 0.42, T.m.wood('nangka', false), 0, 4.75, -5.2));
+          var ivory = T.m.plain(0xe9e1cc, 0.6, true);
+          for (var i = 0; i < 6; i++) {
+            var y = 4.3 + i * 0.85;
+            [1, -1].forEach(function (s) {
+              var h = T.tube([[s * 0.2, 0, 0], [s * 0.55, 0.12, 0], [s * 0.9, 0.4, 0], [s * 1.0, 0.8, 0]], 0.1, 0.02, ivory, 8, 14);
+              h.position.set(0, y, -5.45); g.add(h);
+            });
+          }
+        }
+      },
+      {
+        key: 'atap', name: 'Atap perahu (ulu banua)', sub: 'Atap melengkung ke atas',
+        kicker: 'Bagian 5 · penutup', anchor: [0, 6.8, 0], cy: 7.0, base: BASE, ex: [0, 3.6, 0],
+        paras: [
+          'Atap Tongkonan melengkung seperti perahu terbalik dan melambangkan kekuatan dan keberanian. Ujungnya yang meruncing ke atas dikaitkan dengan hubungan manusia dengan dunia leluhur.',
+          'Atap dianggap bagian paling suci karena melambangkan dunia atas.',
+          'Atap tersusun dari bilah bambu bertumpuk dengan lapisan atas ijuk, rumbia, alang-alang, atau seng.'
+        ],
+        note: 'Catatan model: atap digambar sebagai satu lengkung ijuk tanpa lapisan bilah bambu.',
+        src: ['km', 'mn', 'uj', 'bi'],
+        build: function (g, T) {
+          var geo = T.curveRoof({ L: 5.6, halfW: function () { return 3.0; }, eave: eave, ridge: ridge, nz: 36, nu: 14, rx: 3, ry: 6 });
+          g.add(new THREE.Mesh(geo, T.m.roof('ijuk')));
+        }
+      },
+      {
+        key: 'tangalok', space: true, n: 'U', name: 'Tangalok', sub: 'Ruang di sisi utara',
+        kicker: 'Ruang · utara', anchor: [0, 2.9, -2.75], cy: 2.9, base: BASE, ex: [0, 1.6, 0],
+        paras: [
+          'Tangalok berada di sisi utara, yaitu bagian depan rumah. Ruang ini dipakai sebagai ruang tamu, kamar anak, dan tempat sesaji.'
+        ],
+        note: 'Catatan model: bidang emas di lantai menandai tiap ruang. Sekat ruang asli belum digambar.',
+        src: ['bi', 'km'],
+        build: function (g, T, L) { T.zone(L, { y: 2.76, cells: [{ w: 4.0, d: 2.5, x: 0, z: -2.75, a: 0.26 }] }); }
+      },
+      {
+        key: 'sali', space: true, n: 'T', name: 'Sali', sub: 'Ruang tengah keluarga',
+        kicker: 'Ruang · tengah', anchor: [0, 2.9, 0], cy: 2.9, base: BASE, ex: [0, 1.6, 0],
+        paras: [
+          'Sali berada di tengah. Ruang ini dipakai sebagai ruang keluarga, dapur, ruang makan, dan tempat musyawarah keluarga.',
+          'Di sini pula jenazah diletakkan sebelum upacara penguburan.'
+        ],
+        note: 'Catatan model: bidang emas di lantai menandai tiap ruang. Sekat ruang asli belum digambar.',
+        src: ['bi', 'km', 'mn'],
+        build: function (g, T, L) { T.zone(L, { y: 2.76, cells: [{ w: 4.0, d: 2.8, x: 0, z: 0, a: 0.26 }] }); }
+      },
+      {
+        key: 'sumbung', space: true, n: 'S', name: 'Sumbung', sub: 'Ruang kepala keluarga',
+        kicker: 'Ruang · selatan', anchor: [0, 2.9, 2.75], cy: 2.9, base: BASE, ex: [0, 1.6, 0],
+        paras: [
+          'Sumbung berada di sisi selatan dan menjadi ruang khusus kepala keluarga. Ruang ini dipercaya sebagai sumber penyakit.'
+        ],
+        note: 'Catatan model: bidang emas di lantai menandai tiap ruang. Sekat ruang asli belum digambar.',
+        src: ['bi', 'km'],
+        build: function (g, T, L) { T.zone(L, { y: 2.76, cells: [{ w: 4.0, d: 2.5, x: 0, z: 2.75, a: 0.26 }] }); }
+      },
+      {
+        key: 'alang', space: true, n: 'A', name: 'Alang', sub: 'Lumbung padi di seberang halaman',
+        kicker: 'Pasangan rumah · utara halaman', anchor: [0, 5.0, -12], cy: 3.6, base: BASE, ex: [0, 0, 0],
+        paras: [
+          'Alang adalah lumbung padi berukir yang berdiri di depan rumah. Tongkonan dianggap ibu, dan alang dianggap bapak.',
+          'Tongkonan menghadap utara dan alang menghadap selatan, saling berhadapan. Halaman memanjang di antaranya disebut uluba\'bah.',
+          'Jumlah dan ukuran alang menunjukkan status kekayaan pemilik.'
+        ],
+        note: 'Catatan model: alang digambar sebagai satu lumbung kecil. Bentuk dan jumlah aslinya bisa berbeda.',
+        src: ['bi', 'km', 'uj'],
+        build: function (g, T) {
+          [-0.8, 0.8].forEach(function (x) { [-1.6, 1.6].forEach(function (z) {
+            g.add(T.cyl(0.2, 0.24, 2.4, 14, T.m.wood('nangka', false), x, 1.2, -12 + z));
+          }); });
+          g.add(T.box(2.4, 0.25, 4.6, T.m.wood('nangka', true), 0, 2.52, -12));
+          g.add(T.box(2.2, 1.3, 4.2, carveMat(T, 2, 1), 0, 3.3, -12));
+          var geo = T.curveRoof({ L: 2.9, halfW: function () { return 1.6; }, eave: function (t) { return 4.2 + 1.2 * t * t; }, ridge: function (t) { return 4.2 + 1.2 * t * t + 0.9 + 0.7 * t * t; }, nz: 24, nu: 10, rx: 2, ry: 3 });
+          var r = new THREE.Mesh(geo, T.m.roof('ijuk')); r.position.z = -12; g.add(r);
+        }
+      }
+    ]
+  });
+})();
+/* ===== Rumah Gadang (Minangkabau) ===== */
+(function () {
+  var THREE = App.T.THREE;
+  var COLS = [-6.25, -3.75, -1.25, 1.25, 3.75, 6.25];
+  var ROWS = [-2.4, -1.2, 0, 1.2, 2.4];
+  var FY = 2.3; // tinggi lantai
+  function eave(t) { return 5.0 + 0.9 * t * t; }
+  function ridge(t) { return 6.9 + 2.6 * t * t; }
+  function carveMat(T, rx, ry) {
+    var t = T.tex.carve('gadang').clone(); t.needsUpdate = true; t.repeat.set(rx, ry);
+    return T.m.map(t);
+  }
+
+  App.register({
+    id: 'gadang', tab: 'Rumah Gadang', place: 'Minangkabau',
+    kicker: 'Rumah Gadang · rumah adat Minangkabau', title: 'Rumah beratap gonjong',
+    paras: [
+      'Rumah Gadang adalah rumah panggung kayu Minangkabau. Atapnya melengkung ke atas dan runcing, disebut gonjong.',
+      'Tiangnya tidak ditanam, melainkan bertumpu di atas batu sandi. Sambungan kayunya memakai pasak, bukan paku.',
+      'Rumah ini bersifat matrilineal: tanah dimiliki dan diwarisi perempuan, dan jumlah kamar mengikuti jumlah perempuan yang tinggal di dalamnya.'
+    ],
+    note: 'Ketuk bagian di daftar, penanda bernomor, atau langsung pada model. Model ini disederhanakan, lihat catatan di tiap bagian.',
+    srcAll: ['as', 'dt'],
+    src: {
+      as: ['ARSITAG: Rumah Gadang, Rumah Tradisional Minangkabau', 'https://www.arsitag.com/article/rumah-gadang-rumah-tradisional-minangkabau'],
+      dt: ['detikProperti: Mengenal Rumah Gadang', 'https://www.detik.com/properti/arsitektur/d-7439378/mengenal-rumah-gadang-bentuk-jenis-fungsi-dan-keunikannya']
+    },
+    list1: 'Struktur, disusun dari bawah ke atas', list2: 'Ruang & pelengkap',
+    home: [16, 8, 17], ty: [4.6, 9.6], bd: 0.55, minD: 10, maxD: 80, ringR: 12.5,
+    layers: [
+      {
+        key: 'sandi', name: 'Batu sandi', sub: 'Tumpuan tiang',
+        kicker: 'Bagian 1 · tumpuan', anchor: [6.25, 0.3, 2.4], cy: 0.3, base: [0, 0, 0], ex: [0, 0, 0],
+        paras: [
+          'Setiap tiang diletakkan di atas sandi, yaitu batu besar yang bagian atasnya rata. Tiang tidak ditanam ke tanah.',
+          'Batu sandi menahan air tanah agar tidak mengenai tiang, memperluas bidang tumpu, dan membantu meredam getaran gempa.'
+        ],
+        note: 'Catatan model: 30 batu, satu untuk tiap tiang.',
+        src: ['dt', 'as'],
+        build: function (g, T) {
+          COLS.forEach(function (x) { ROWS.forEach(function (z) {
+            g.add(T.box(0.7, 0.3, 0.7, T.m.stone(false), x, 0.15, z));
+          }); });
+        }
+      },
+      {
+        key: 'tiang', name: 'Tiang', sub: 'Lima baris, miring ke luar',
+        kicker: 'Bagian 2 · tiang', anchor: [-6.25, 1.4, 2.4], cy: 1.4, base: [0, 0, 0], ex: [0, 1.2, 0],
+        paras: [
+          'Tiang idealnya disusun dalam lima baris sepanjang rumah. Ruang di antara baris-barisnya membentuk empat lanjar.',
+          'Tiang dibuat sedikit miring ke arah luar sehingga badan rumah membesar ke atas seperti trapesium.',
+          'Sambungan tiang memakai pasak kayu. Rumah ini dirancang agar lentur: saat gempa ia berayun mengikuti gelombang.'
+        ],
+        note: 'Catatan model: kemiringan tiang terlalu kecil untuk terlihat jelas, dan hanya tiang baris terluar yang digambar miring.',
+        src: ['as', 'dt'],
+        build: function (g, T) {
+          var W = T.m.wood('ulin', false);
+          COLS.forEach(function (x) { ROWS.forEach(function (z, i) {
+            var out = i === 0 ? -1 : i === ROWS.length - 1 ? 1 : 0;
+            var m = T.box(0.32, FY - 0.3, 0.32, W, x, 0.3 + (FY - 0.3) / 2, z + out * 0.06);
+            m.rotation.x = out * 0.03; g.add(m);
+          }); });
+          ROWS.forEach(function (z) { g.add(T.box(13.4, 0.2, 0.2, W, 0, FY - 0.1, z)); });
+        }
+      },
+      {
+        key: 'lantai', name: 'Lantai & anjuang', sub: 'Lantai tinggi di kedua ujung',
+        kicker: 'Bagian 3 · lantai', anchor: [-6.0, 2.8, 0], cy: 2.8, base: [0, 0, 0], ex: [0, 2.6, 0],
+        paras: [
+          'Lantai papan menutup bagian atas tiang. Di ujung kiri dan kanan, lantainya dibuat lebih tinggi, disebut anjuang (anjungan).',
+          'Anjuang dipakai untuk penobatan kepala adat dan tempat pengantin bersanding. Pada rumah bergaya Koto Piliang, anjungan ditempati pemimpin; pada Budi Caniago tidak ada anjungan karena semua setara.'
+        ],
+        note: 'Catatan model: anjuang digambar di kedua ujung, sedangkan menurut sumber ada gaya rumah yang tidak memilikinya.',
+        src: ['dt', 'as'],
+        build: function (g, T) {
+          g.add(T.box(13.8, 0.2, 5.4, T.m.wood('papan', true), 0, FY + 0.1, 0));
+          [-1, 1].forEach(function (s) {
+            g.add(T.box(2.6, 0.3, 5.0, T.m.wood('papan', true), s * 5.4, FY + 0.35, 0));
+          });
+        }
+      },
+      {
+        key: 'dinding', name: 'Dinding', sub: 'Papan berukir dan anyaman bambu',
+        kicker: 'Bagian 4 · dinding', anchor: [0, 3.9, 2.6], cy: 3.9, base: [0, 0, 0], ex: [0, 3.8, 0],
+        paras: [
+          'Dinding depan (dindiang tapi) dari papan yang dipasang vertikal dan berukir. Motifnya tumbuhan merambat, akar, bunga, dan buah, serta bentuk geometri.',
+          'Dinding samping dan belakang tradisionalnya dianyam dari bambu. Anyaman ini dimaknai sebagai kekuatan masyarakat yang terbentuk ketika tiap individu menjadi bagian dari yang lebih besar.',
+          'Ukiran mengikuti falsafah alam takambang jadi guru, yaitu alam sebagai sumber pengetahuan.'
+        ],
+        note: 'Catatan model: pintu dan jendela belum digambar, dan motif ukir hanyalah gambaran.',
+        src: ['as', 'dt'],
+        build: function (g, T, L) {
+          var y = FY + 0.2 + 1.3, h = 2.6;
+          var front = new THREE.Group(); g.add(front);
+          front.add(T.box(13.4, h, 0.14, carveMat(T, 7, 1.3), 0, y, 2.55));
+          T.spread(L, front, [0, 0, 2.2]);
+          var back = new THREE.Group(); g.add(back);
+          var b = T.box(13.4, h, 0.1, T.m.map(T.tex.woven(), true), 0, y, -2.55);
+          b.rotation.x = -0.03; back.add(b);
+          T.spread(L, back, [0, 0, -2.2]);
+          [-1, 1].forEach(function (s) {
+            var side = new THREE.Group(); g.add(side);
+            side.add(T.box(0.1, h, 5.0, T.m.map(T.tex.woven(), true), s * 6.7, y, 0));
+            T.spread(L, side, [s * 2.2, 0, 0]);
+          });
+        }
+      },
+      {
+        key: 'atap', name: 'Atap gonjong', sub: 'Atap ijuk melengkung ke atas',
+        kicker: 'Bagian 5 · penutup', anchor: [0, 7.0, 0], cy: 7.4, base: [0, 0, 0], ex: [0, 7.4, 0],
+        paras: [
+          'Atap gonjong dahulu dibuat dari ijuk, dan kini banyak diganti seng. Ujungnya runcing menjulang ke atas.',
+          'Gonjong dimaknai sebagai tanduk kerbau, pucuk rebung, kapal, atau bukit. Ujung yang runcing juga dikaitkan dengan harapan mencapai Tuhan.',
+          'Jumlah gonjong menentukan gaya rumah: pada Koto Piliang tiga di kiri dan kanan, satu di depan, dua di belakang; pada Budi Caniago dua di kanan dan kiri.'
+        ],
+        note: 'Catatan model: digambar empat gonjong sepanjang bubungan. Sumber menyebut jumlah empat atau enam, dan susunan aslinya bergantung gaya rumah.',
+        src: ['as', 'dt'],
+        build: function (g, T) {
+          var geo = T.curveRoof({ L: 7.8, halfW: function () { return 3.5; }, eave: eave, ridge: ridge, nz: 40, nu: 14, rx: 4, ry: 10 });
+          var roof = new THREE.Mesh(geo, T.m.roof('ijuk'));
+          roof.rotation.y = Math.PI / 2; g.add(roof);
+          var dark = T.m.roof('ijuk');
+          [-7.3, -2.6, 2.6, 7.3].forEach(function (x) {
+            var s = x < 0 ? -1 : 1, t = x / 7.8, r = ridge(t);
+            var h = T.tube([[x, r - 0.3, 0], [x + s * 0.15, r + 0.7, 0], [x + s * 0.5, r + 1.7, 0], [x + s * 0.55, r + 2.3, 0]], 0.3, 0.03, dark, 10, 18);
+            g.add(h);
+          });
+        }
+      },
+      {
+        key: 'tangga', space: true, n: 'T', name: 'Tangga & serambi', sub: 'Pintu masuk di tengah',
+        kicker: 'Akses · depan', anchor: [0, 1.4, 4.4], cy: 1.4, base: [0, 0, 0], ex: [0, 2.6, 1.0], selMove: [0, 0, 1.8],
+        paras: [
+          'Rumah memanjang dan pintunya ada di bagian tengah. Orang naik lewat tangga di tengah. Pintunya tidak menghadap jalan, agar kegiatan di dalam tidak langsung terlihat dari luar.',
+          'Setiap orang yang hendak naik harus mencuci kaki terlebih dahulu.'
+        ],
+        note: 'Catatan model: bentuk tangga dan batu cuci kaki adalah rekaan sederhana. Sumber tidak menjelaskan bentuknya.',
+        src: ['dt', 'as'],
+        build: function (g, T) {
+          var W = T.m.wood('ulin', false);
+          for (var i = 0; i < 5; i++) g.add(T.box(2.2, 0.16, 0.5, W, 0, 0.5 + i * 0.4, 4.6 - i * 0.5));
+          g.add(T.box(2.6, 0.2, 1.2, T.m.wood('papan', true), 0, FY + 0.1, 3.4));
+          g.add(T.box(1.4, 0.2, 1.0, T.m.stone(true), 0, 0.1, 5.8));
+        }
+      },
+      {
+        key: 'labuah', space: true, n: 'L', name: 'Labuah gajah', sub: 'Lanjar umum di depan',
+        kicker: 'Ruang · depan', anchor: [0, 3.2, 1.2], cy: 3.2, base: [0, 0, 0], ex: [0, 2.6, 0],
+        paras: [
+          'Labuah gajah (jalan gajah) adalah lanjar umum untuk kegiatan sehari-hari dan acara seremonial.',
+          'Ruang depan dipakai untuk berkumpul, musyawarah, menerima tamu, dan upacara adat.'
+        ],
+        note: 'Catatan model: bidang emas menandai lanjar kira-kira. Letak dan lebar aslinya bisa berbeda.',
+        src: ['as', 'dt'],
+        build: function (g, T, L) { T.zone(L, { y: FY + 0.22, cells: [{ w: 8.0, d: 2.2, x: 0, z: 1.3, a: 0.26 }] }); }
+      },
+      {
+        key: 'bilik', space: true, n: 'B', name: 'Bilik (ruang)', sub: 'Kamar di lanjar belakang',
+        kicker: 'Ruang · belakang', anchor: [0, 3.2, -1.6], cy: 3.2, base: [0, 0, 0], ex: [0, 2.6, 0],
+        paras: [
+          'Lanjar paling belakang dibagi menjadi kamar tidur yang disebut Ruang. Adat menetapkan minimal lima Ruang, dengan jumlah ideal sembilan.',
+          'Jumlah kamar mengikuti jumlah perempuan yang tinggal di rumah itu.'
+        ],
+        note: 'Catatan model: lima bilik digambar sebagai batas minimal menurut sumber.',
+        src: ['as', 'dt'],
+        build: function (g, T, L) {
+          var cells = [];
+          for (var i = 0; i < 5; i++) cells.push({ w: 1.5, d: 1.9, x: -3.2 + i * 1.6, z: -1.7, a: 0.28 });
+          T.zone(L, { y: FY + 0.22, cells: cells });
+        }
+      },
+      {
+        key: 'rangkiang', space: true, n: 'R', name: 'Rangkiang', sub: 'Tiga lumbung padi',
+        kicker: 'Pelengkap · halaman', anchor: [0, 3.4, 9.6], cy: 2.6, base: [0, 0, 0], ex: [0, 0, 0],
+        paras: [
+          'Rangkiang adalah rumah kecil terpisah untuk menyimpan cadangan padi, dipakai saat bencana atau perang.',
+          'Ada tiga jenis: Sitinjau Lauik untuk beras upacara adat, Sitangka Lapa untuk sumbangan ke desa miskin dan yang kelaparan, dan Sibayau-bayau untuk kebutuhan sehari-hari keluarga.'
+        ],
+        note: 'Catatan model: ketiganya digambar serupa dan diletakkan di depan rumah. Ukuran dan letak aslinya bervariasi.',
+        src: ['as', 'dt'],
+        build: function (g, T) {
+          [-4, 0, 4].forEach(function (x) {
+            [-0.55, 0.55].forEach(function (dx) { [-0.55, 0.55].forEach(function (dz) {
+              g.add(T.cyl(0.1, 0.1, 1.2, 8, T.m.wood('ulin', false), x + dx, 0.6, 9.6 + dz));
+            }); });
+            g.add(T.box(1.6, 1.0, 1.6, T.m.wood('nangka', false), x, 1.7, 9.6));
+            var geo = T.curveRoof({ L: 1.0, halfW: function () { return 1.05; }, eave: function () { return 2.2; }, ridge: function (t) { return 2.9 + 0.7 * t * t; }, nz: 8, nu: 8, rx: 2, ry: 2 });
+            var r = new THREE.Mesh(geo, T.m.roof('ijuk')); r.rotation.y = Math.PI / 2; r.position.set(x, 0, 9.6); g.add(r);
+          });
+        }
+      }
+    ]
+  });
+})();
+/* ===== Rumah Bolon (Batak Toba) ===== */
+(function () {
+  var THREE = App.T.THREE;
+  var FY = 1.9;            // tinggi lantai
+  var PX = [-2.2, 0, 2.2];  // 3 baris x 6 = 18 tiang
+  var PZ = [-4, -2.4, -0.8, 0.8, 2.4, 4];
+  function eave(t) { return 4.4 + 1.3 * t * t; }
+  function ridge(t) { return 6.2 + 2.1 * t * t; }
+  var RZ = 0.4; // atap digeser ke depan: ujung depan lebih panjang
+  function tAt(z) { return (z - RZ) / 5.2; }
+  function carve(T, rx, ry) { var t = T.tex.carve('gorga').clone(); t.needsUpdate = true; t.repeat.set(rx, ry); return T.m.map(t); }
+
+  App.register({
+    id: 'bolon', tab: 'Rumah Bolon', place: 'Batak Toba',
+    kicker: 'Rumah Bolon · rumah adat Batak Toba', title: 'Rumah berpunggung kerbau',
+    paras: [
+      'Rumah Bolon berdiri di atas tiang kayu yang bertumpu pada batu. Atapnya dari ijuk dan melengkung seperti punggung kerbau.',
+      'Dinding rumah dibuat miring ke luar, dan bagian depannya dihiasi ukiran bernama gorga.',
+      'Pada zaman dahulu, satu rumah bisa dihuni dua sampai enam keluarga.'
+    ],
+    note: 'Ketuk bagian di daftar, penanda bernomor, atau langsung pada model. Ukuran di model mengikuti angka dari sumber bila ada, sisanya perkiraan.',
+    srcAll: ['rb', 'ks'],
+    src: {
+      rb: ['Ruang Arsitek: Rumah Bolon', 'https://ruangarsitek.com/rumah-adat-batak/'],
+      ks: ['KabarSumut: Gorga dan Filosofi', 'https://kabarsumut.co.id/detail/46866/gorga-dan-filosofi-mengenal-lebih-dekat-rumah-adat-batak']
+    },
+    list1: 'Struktur, disusun dari bawah ke atas', list2: '',
+    home: [15, 8, 17], ty: [4.0, 8.4], bd: 0.55, minD: 10, maxD: 70, ringR: 10.4,
+    layers: [
+      {
+        key: 'ojahan', name: 'Batu ojahan', sub: 'Tumpuan berbentuk cincin',
+        kicker: 'Bagian 1 · pondasi', anchor: [2.2, 0.3, 4], cy: 0.3, base: [0, 0, 0], ex: [0, 0, 0],
+        paras: [
+          'Pondasinya bertipe cincin: tiang kayu berdiri di atas batu yang disebut ojahan, tidak ditanam ke tanah.',
+          'Susunan ini dinilai fleksibel dan tahan gempa.'
+        ],
+        note: 'Catatan model: satu batu untuk tiap tiang, bentuknya disederhanakan.',
+        src: ['rb'],
+        build: function (g, T) {
+          PX.forEach(function (x) { PZ.forEach(function (z) { g.add(T.cyl(0.5, 0.58, 0.3, 14, T.m.stone(false), x, 0.15, z)); }); });
+        }
+      },
+      {
+        key: 'tiang', name: 'Tiang', sub: '18 tiang kayu',
+        kicker: 'Bagian 2 · tiang', anchor: [-2.2, 1.1, 4], cy: 1.1, base: [0, 0, 0], ex: [0, 1.2, 0],
+        paras: [
+          'Tiang berdiameter sekitar 42 sampai 50 cm. Jumlahnya umumnya 18, yang dimaknai sebagai kekokohan dan kebersamaan.',
+          'Tiang bertumpu di atas batu ojahan, bukan tertanam.'
+        ],
+        note: 'Catatan model: tiang digambar tegak dengan diameter 46 cm, 3 baris masing-masing 6 tiang.',
+        src: ['rb'],
+        build: function (g, T) {
+          var W = T.m.wood('ulin', false);
+          PX.forEach(function (x) { PZ.forEach(function (z) { g.add(T.cyl(0.23, 0.23, FY - 0.3, 14, W, x, 0.3 + (FY - 0.3) / 2, z)); }); });
+          PX.forEach(function (x) { g.add(T.box(0.2, 0.2, 8.8, W, x, FY - 0.1, 0)); });
+        }
+      },
+      {
+        key: 'badan', name: 'Lantai & dinding', sub: 'Dunia tengah, dinding miring',
+        kicker: 'Bagian 3 · badan rumah', anchor: [-2.9, 3.0, 0], cy: 3.0, base: [0, 0, 0], ex: [0, 2.6, 0],
+        paras: [
+          'Badan rumah adalah tempat memasak, tidur, dan bermain, dan disebut dunia tengah. Hiasan ipon-ipon dipasang sebagai penolak bala.',
+          'Dinding dibuat miring agar angin mudah masuk ke dalam rumah.',
+          'Dinding diikat dengan tali rotan dan ijuk (ret-ret) berpola cicak berkepala dua yang saling berlawanan arah. Polanya dimaknai sebagai penjaga rumah dan simbol saling menghormati penghuni.',
+          'Pintu selebar 80 cm dan setinggi sekitar 1,5 m, dibuat menjorok ke dalam.'
+        ],
+        note: 'Catatan model: tali ret-ret digambar sebagai pita gelap polos, tanpa pola cicak. Tangga belum digambar karena sumber tidak menjelaskannya.',
+        src: ['rb'],
+        build: function (g, T, L) {
+          var W = function () { return T.m.wood('papan', false); };
+          var rope = T.m.plain(0x1d1511, 0.9, false);
+          g.add(T.box(5.6, 0.18, 9.4, T.m.wood('papan', true), 0, FY + 0.09, 0));
+          function wall(len, h) { // dinding berdiri dari y=0 lokal
+            var grp = new THREE.Group();
+            return grp;
+          }
+          [-1, 1].forEach(function (s) {
+            var piv = new THREE.Group(); piv.position.set(s * 2.7, FY + 0.18, 0); piv.rotation.z = -s * 0.15;
+            piv.add(T.box(0.14, 2.0, 9.0, W(), 0, 1.0, 0));
+            piv.add(T.box(0.18, 0.12, 9.1, rope, 0, 1.0, 0));
+            g.add(piv); T.spread(L, piv, [s * 2.0, 0, 0]);
+          });
+          // dinding belakang (z -)
+          var back = new THREE.Group(); back.position.set(0, FY + 0.18, -4.5); back.rotation.x = -0.15;
+          back.add(T.box(5.4, 2.0, 0.14, W(), 0, 1.0, 0)); back.add(T.box(5.5, 0.12, 0.18, rope, 0, 1.0, 0)); g.add(back);
+          // dinding depan (z +) dengan pintu 0,8 x 1,5
+          var fr = new THREE.Group(); fr.position.set(0, FY + 0.18, 4.5); fr.rotation.x = 0.15;
+          fr.add(T.box(2.3, 2.0, 0.14, W(), -1.55, 1.0, 0));
+          fr.add(T.box(2.3, 2.0, 0.14, W(), 1.55, 1.0, 0));
+          fr.add(T.box(0.8, 0.5, 0.14, W(), 0, 1.75, 0));
+          fr.add(T.box(5.5, 0.12, 0.18, rope, 0, 1.0, 0)); g.add(fr);
+          // gable belakang polos
+          var gb = T.gable(gpts(-4.6), 0.12, W()); gb.position.z = -4.6; g.add(gb);
+        }
+      },
+      {
+        key: 'gorga', name: 'Gorga', sub: 'Ukiran merah, putih, hitam',
+        kicker: 'Bagian 4 · hiasan', anchor: [0, 6.2, 5.0], cy: 6.2, base: [0, 0, 0], ex: [0, 2.6, 1.2],
+        paras: [
+          'Gorga adalah ukiran di bagian depan rumah. Warna merah, hitam, dan putih membawa makna perlindungan, keseimbangan, dan kemakmuran.',
+          'Motifnya mencakup tumbuhan, hewan, dan pola geometris: cicak (boraspati) melambangkan kemampuan beradaptasi, ular berkah bagi penghuni, kerbau rasa terima kasih, mata ni ari (matahari) sumber kehidupan, dan motif payudara kesuburan keluarga.',
+          'Gorga ulu paung dipasang sebagai pelindung rumah.',
+          'Rumah yang penuh hiasan disebut Ruma Gorga Sarimunggu, sedangkan yang tanpa hiasan disebut Jabu Batara Siang atau Jabu Ereng.'
+        ],
+        note: 'Catatan model: motif digambar sebagai bulatan merah, putih, dan hitam saja. Ulu paung digambar sebagai kepala sederhana dan bentuk aslinya tidak dijelaskan sumber.',
+        src: ['ks', 'rb'],
+        build: function (g, T) {
+          var gb = T.gable(gpts(4.7), 0.14, carve(T, 0.35, 0.35)); gb.position.z = 4.72; g.add(gb);
+          var pv = new THREE.Group(); pv.position.set(0, FY + 0.18, 4.62); pv.rotation.x = 0.15;
+          pv.add(T.box(2.0, 1.3, 0.08, carve(T, 2, 2), -1.55, 0.95, 0.1));
+          pv.add(T.box(2.0, 1.3, 0.08, carve(T, 2, 2), 1.55, 0.95, 0.1));
+          pv.add(T.box(5.4, 0.3, 0.08, carve(T, 6, 1), 0, 1.85, 0.1));
+          g.add(pv);
+          var ivory = T.m.plain(0x1d1511, 0.7, true);
+          var head = new THREE.Mesh(new THREE.SphereGeometry(0.34, 14, 12), T.m.plain(0xb3261e, 0.6, false));
+          head.position.set(0, 4.65, 4.9); g.add(head);
+          [-1, 1].forEach(function (s) {
+            var h = T.tube([[0, 0, 0], [s * 0.25, 0.25, 0], [s * 0.45, 0.7, 0]], 0.08, 0.02, ivory, 8, 12);
+            h.position.set(s * 0.15, 4.85, 4.9); g.add(h);
+          });
+        }
+      },
+      {
+        key: 'atap', name: 'Atap ijuk', sub: 'Atap melengkung',
+        kicker: 'Bagian 5 · penutup', anchor: [0, 7.4, 0], cy: 7.2, base: [0, 0, 0], ex: [0, 6.2, 0],
+        paras: [
+          'Atap dari ijuk berbentuk melengkung dan disebut menyerupai punggung kerbau. Bentuk melengkung ini dinilai aerodinamis terhadap angin dari danau.',
+          'Ujung depan dibuat lebih panjang daripada ujung belakang, dimaknai sebagai doa agar keturunan pemilik rumah memiliki masa depan yang baik.',
+          'Bagian dalam atap sering dipakai menyimpan barang pusaka atau keramat.'
+        ],
+        note: 'Catatan model: lengkung atap hanya perkiraan bentuk.',
+        src: ['rb'],
+        build: function (g, T) {
+          var geo = T.curveRoof({ L: 5.2, halfW: function () { return 3.3; }, eave: eave, ridge: ridge, nz: 36, nu: 14, rx: 4, ry: 8 });
+          var r = new THREE.Mesh(geo, T.m.roof('ijuk')); r.position.z = RZ; g.add(r);
+        }
+      }
+    ]
+  });
+
+  function gpts(z) {
+    var t = tAt(z), e = eave(t), r = ridge(t);
+    return [[-3.0, FY + 2.05], [3.0, FY + 2.05], [3.3, e], [0, r], [-3.3, e]];
+  }
+})();
+/* ===== Honai (Papua Pegunungan) ===== */
+(function () {
+  var THREE = App.T.THREE;
+  var R = 2.5;      // jari-jari dinding
+  var WH = 1.0;     // tinggi dinding
+  var F2 = 0.95;    // tinggi lantai atas
+  var NPL = 30;     // jumlah papan dinding
+  var DOOR = 1;     // indeks papan yang dilewati pintu (dikosongkan)
+
+  App.register({
+    id: 'honai', tab: 'Honai', place: 'Papua Pegunungan',
+    kicker: 'Honai · rumah adat suku Dani', title: 'Rumah bulat penahan dingin',
+    paras: [
+      'Honai adalah rumah bulat beratap kerucut dari jerami atau ilalang. Dari udara bentuknya disebut seperti jamur yang berjejer di lembah.',
+      'Rumah ini tanpa jendela, hanya satu pintu sempit, dan sebuah perapian di tengah memberi kehangatan.',
+      'Honai adalah rumah laki-laki. Rumah perempuan disebut ebei, dan kandang ternak disebut wamai.'
+    ],
+    note: 'Ketuk bagian di daftar, penanda bernomor, atau langsung pada model. Ukuran model mengikuti tinggi 2 sampai 2,5 m dari sumber.',
+    srcAll: ['ud', 'tl', 'dt'],
+    src: {
+      ud: ['Universitas Jember: Rumah Honai', 'https://tamankebangsaan.unej.ac.id/rnh'],
+      tl: ['KPU Tolikara: Mengenal Rumah Honai', 'https://kab-tolikara.kpu.go.id/blog/read/8480_mengenal-rumah-honai-dan-makna-budayanya-bagi-orang-papua'],
+      dt: ['detikTravel: Honai, rumah tanpa jendela', 'https://travel.detik.com/domestic-destination/d-5933531/mengenal-honai-rumah-tanpa-jendela-yang-unik-dari-papua']
+    },
+    list1: 'Struktur, disusun dari bawah ke atas', list2: 'Ruang',
+    home: [8, 5, 10], ty: [1.3, 4.3], bd: 0.7, minD: 5, maxD: 40, ringR: 5.2,
+    layers: [
+      {
+        key: 'tanah', name: 'Lantai tanah', sub: 'Tanah padat dan perapian',
+        kicker: 'Bagian 1 · dasar', anchor: [1.5, 0.15, 1.3], cy: 0.2, base: [0, 0, 0], ex: [0, 0, 0],
+        paras: [
+          'Lantai dasar adalah tanah yang dipadatkan, beralas rumput atau jerami. Lantai pertama dipakai untuk tidur.',
+          'Bentuk bundar membuat panas dari api menyebar merata.'
+        ],
+        note: 'Catatan model: diameter rumah tidak disebut sumber, diperkirakan sekitar 5 m.',
+        src: ['tl', 'ud'],
+        build: function (g, T) {
+          g.add(T.cyl(R + 0.1, R + 0.1, 0.16, 40, T.m.plain(0x6b5a3f, 0.95, false), 0, 0.08, 0));
+          g.add(T.cyl(R - 0.5, R - 0.5, 0.04, 40, T.m.plain(0xa8905a, 0.95, false), 0, 0.18, 0));
+        }
+      },
+      {
+        key: 'dinding', name: 'Dinding kayu', sub: 'Papan melingkar',
+        kicker: 'Bagian 2 · dinding', anchor: [-2.5, 0.6, 0], cy: 0.6, base: [0, 0, 0], ex: [0, 1.7, 0],
+        paras: [
+          'Dinding disusun melingkar dari papan kayu kasar, bertiang kayu besi. Susunan melingkar melambangkan kesatuan dan persatuan.',
+          'Honai tidak berjendela untuk melindungi penghuni dari udara dingin pegunungan. Hanya ada satu pintu yang sempit dan ventilasi kecil.'
+        ],
+        note: 'Catatan model: 30 papan, satu celah untuk pintu. Dinding aslinya juga disebut dianyam, model memakai papan.',
+        src: ['ud', 'tl', 'dt'],
+        build: function (g, T, L) {
+          var W = T.m.wood('papan', false);
+          for (var i = 0; i < NPL; i++) {
+            if (i >= DOOR - 1 && i <= DOOR + 1) continue;
+            var a = i / NPL * Math.PI * 2, x = Math.sin(a) * R, z = Math.cos(a) * R;
+            var p = T.box(0.5, WH, 0.12, W, x, 0.1 + WH / 2, z); p.rotation.y = a;
+            g.add(p); T.spread(L, p, [Math.sin(a) * 1.6, 0, Math.cos(a) * 1.6]);
+          }
+        }
+      },
+      {
+        key: 'lantai2', name: 'Lantai atas', sub: 'Tempat bersantai dan makan',
+        kicker: 'Bagian 3 · lantai', anchor: [1.7, F2 + 0.1, -1.2], cy: F2 + 0.1, base: [0, 0, 0], ex: [0, 0.9, 0],
+        paras: [
+          'Rumah memiliki dua lantai. Lantai atas dipakai untuk bersantai dan makan, serta untuk beraktivitas dan membuat kerajinan.',
+          'Lantai dari rumput atau jerami melambangkan kesederhanaan, dan tamu duduk beralaskan jerami agar tercipta kebersamaan.'
+        ],
+        note: 'Catatan model: bukaan di tengah lantai atas untuk asap dan cahaya adalah rekaan, sumber tidak menjelaskan susunan lantai atas.',
+        src: ['ud', 'dt'],
+        build: function (g, T) {
+          var s = new THREE.Shape(); s.absarc(0, 0, R - 0.25, 0, Math.PI * 2, false);
+          var h = new THREE.Path(); h.absarc(0, 0, 0.8, 0, Math.PI * 2, true); s.holes.push(h);
+          var geo = new THREE.ExtrudeGeometry(s, { depth: 0.1, bevelEnabled: false, curveSegments: 40 });
+          geo.rotateX(-Math.PI / 2);
+          var m = new THREE.Mesh(geo, T.m.plain(0xa8905a, 0.95, true)); m.position.y = F2; g.add(m);
+        }
+      },
+      {
+        key: 'atap', name: 'Atap kerucut', sub: 'Jerami atau ilalang',
+        kicker: 'Bagian 4 · penutup', anchor: [0, 2.0, 0.9], cy: 1.9, base: [0, 0, 0], ex: [0, 3.6, 0],
+        paras: [
+          'Atap berbentuk kerucut dari jerami atau ilalang yang disusun tebal untuk menahan dingin dan hujan. Atap menutup hingga ke bawah untuk melindungi dinding.',
+          'Ilalang dimaknai sebagai mandiri, kuat, kritis, dan mudah menyesuaikan diri.',
+          'Tinggi rumah umumnya dua sampai dua setengah meter.'
+        ],
+        note: 'Catatan model: rangka atap di dalam tidak digambar.',
+        src: ['ud', 'tl'],
+        build: function (g, T) {
+          var geo = new THREE.CylinderGeometry(0.06, R + 0.5, 1.9, 40, 1, true);
+          var m = T.m.roof('rumbia'); var r = new THREE.Mesh(geo, m); r.position.y = 0.85 + 0.95; g.add(r);
+          g.add(T.cyl(0.07, 0.1, 0.5, 8, T.m.wood('papan', false), 0, 2.85, 0));
+        }
+      },
+      {
+        key: 'api', space: true, n: 'A', name: 'Perapian', sub: 'Galian tanah di tengah',
+        kicker: 'Ruang · pusat rumah', anchor: [0, 0.5, 0], cy: 0.4, base: [0, 0, 0], ex: [0, 0, 0],
+        paras: [
+          'Di tengah lantai ada tungku berupa galian tanah, sumber panas sekaligus tempat memasak. Bara apinya memberi penerangan dan kehangatan.'
+        ],
+        note: 'Catatan model: bidang emas menandai posisi perapian; api digambar sebagai kerucut oranye.',
+        src: ['dt', 'tl'],
+        build: function (g, T, L) {
+          g.add(T.cyl(0.55, 0.55, 0.12, 20, T.m.stone(false), 0, 0.24, 0));
+          g.add(T.cyl(0.0, 0.3, 0.55, 12, T.m.plain(0xd9622b, 0.6, false), 0, 0.55, 0));
+          T.zone(L, { y: 0.21, cells: [{ w: 1.6, d: 1.6, x: 0, z: 0, a: 0.3 }] });
+        }
+      },
+      {
+        key: 'pintu', space: true, n: 'P', name: 'Pintu', sub: 'Satu pintu sempit',
+        kicker: 'Ruang · akses', anchor: [0, 0.5, 2.5], cy: 0.5, base: [0, 0, 0], ex: [0, 0, 0],
+        paras: [
+          'Honai hanya punya satu pintu yang sempit dan tidak berjendela. Ukuran pintunya tidak disebut dalam sumber.'
+        ],
+        note: 'Catatan model: celah pintu selebar tiga papan, ukurannya perkiraan.',
+        src: ['tl', 'dt'],
+        build: function (g, T, L) {
+          var a = DOOR / NPL * Math.PI * 2;
+          T.zone(L, { y: 0.21, cells: [{ w: 0.9, d: 1.2, x: Math.sin(a) * (R - 0.1), z: Math.cos(a) * (R - 0.1), a: 0.35 }] });
+        }
+      }
+    ]
+  });
+})();
+/* ===== Rumah Betang (Dayak) ===== */
+(function () {
+  var THREE = App.T.THREE;
+  var FY = 4.0;                       // tinggi lantai (kolong sampai 4 m)
+  var PX = [-3, 0, 3];
+  var PZ = []; for (var k = -12; k <= 12; k += 2) PZ.push(k);   // 13 baris tiang
+  var DOORS = []; for (var d = 0; d < 8; d++) DOORS.push(-10.5 + 3 * d);
+  function eave(t) { return 6.6 + 0.6 * t * t; }
+  function ridge(t) { return eave(t) + 2.0 + 0.4 * t * t; }
+  var CX = 0.8; // pusat atap (badan + serambi)
+
+  App.register({
+    id: 'betang', tab: 'Betang', place: 'Dayak, Kalimantan',
+    kicker: 'Rumah Betang · rumah panjang Dayak', title: 'Satu atap untuk banyak keluarga',
+    paras: [
+      'Rumah Betang adalah rumah panggung panjang dari kayu ulin yang dihuni banyak keluarga di bawah satu atap.',
+      'Rumah harus menghadap ke arah matahari terbit, yang melambangkan semangat kerja keras. Bagian hilir mengarah ke matahari terbenam.',
+      'Model ini jauh lebih pendek dari betang asli. Sumber menyebut ukuran sekitar 150 m x 30 m, dengan 35 pintu pada betang Dayak Kanayat\'n.'
+    ],
+    note: 'Ketuk bagian di daftar, penanda bernomor, atau langsung pada model. Model dipendekkan menjadi 8 pintu agar muat di layar.',
+    srcAll: ['ik', 'jn'],
+    src: {
+      ik: ['Indonesia Kaya: Rumah Betang Dayak Kanayat\'n', 'https://indonesiakaya.com/pustaka-indonesia/rumah-betang-jantung-tradisi-dan-identitas-dayak-kanayatn/'],
+      jn: ['JNEWS Online: Rumah Betang', 'https://jnewsonline.com/rumah-betang-dayak/']
+    },
+    list1: 'Struktur, disusun dari bawah ke atas', list2: 'Ruang & akses',
+    home: [30, 14, 26], ty: [5.0, 9.4], bd: 0.5, minD: 14, maxD: 110, ringR: 16,
+    layers: [
+      {
+        key: 'tiang', name: 'Tiang ulin', sub: 'Rumah panggung tinggi',
+        kicker: 'Bagian 1 · tiang', anchor: [3, 1.6, 12], cy: 1.8, base: [0, 0, 0], ex: [0, 0, 0],
+        paras: [
+          'Tiang dibuat dari kayu ulin yang terkenal kuat dan tahan lama, dengan tinggi kolong hingga sekitar 4 meter. Tiang kayu disebut rata-rata setinggi 5 meter.',
+          'Rumah yang ditinggikan melindungi penghuni dari musuh, binatang buas, dan banjir.'
+        ],
+        note: 'Catatan model: 3 baris tiang dengan 13 tiang tiap baris, jumlah aslinya tidak disebut sumber.',
+        src: ['ik', 'jn'],
+        build: function (g, T) {
+          var W = T.m.wood('ulin', false);
+          PX.forEach(function (x) { PZ.forEach(function (z) { g.add(T.cyl(0.24, 0.24, FY - 0.2, 12, W, x, (FY - 0.2) / 2, z)); }); });
+          PX.forEach(function (x) { g.add(T.box(0.22, 0.22, 25.6, W, x, FY - 0.2, 0)); });
+        }
+      },
+      {
+        key: 'lantai', name: 'Lantai & serambi', sub: 'Serambi sepanjang rumah',
+        kicker: 'Bagian 2 · lantai', anchor: [5.0, FY + 0.5, 0], cy: FY + 0.4, base: [0, 0, 0], ex: [0, 2.2, 0],
+        paras: [
+          'Lantai papan menutup bagian atas tiang. Di sisi depan ada serambi yang tidak disekat antar-pintu.',
+          'Rumah dipakai bersama untuk keamanan, berbagi makanan, bekerja di ladang, dan berbagi suka-duka, dengan aturan adat.'
+        ],
+        note: 'Catatan model: pagar serambi adalah rekaan sederhana.',
+        src: ['ik', 'jn'],
+        build: function (g, T) {
+          var P = T.m.wood('papan', true), W = T.m.wood('ulin', false);
+          g.add(T.box(8.8, 0.2, 25.0, P, 0.8, FY + 0.1, 0));
+          for (var i = -12; i <= 12; i += 2) g.add(T.box(0.1, 0.9, 0.1, W, 5.2, FY + 0.65, i));
+          g.add(T.box(0.1, 0.1, 24.2, W, 5.2, FY + 1.1, 0));
+        }
+      },
+      {
+        key: 'dinding', name: 'Dinding & pintu', sub: 'Satu pintu untuk tiap keluarga',
+        kicker: 'Bagian 3 · dinding', anchor: [3.5, FY + 1.4, 10.5], cy: FY + 1.4, base: [0, 0, 0], ex: [0, 2.2, 0],
+        paras: [
+          'Setiap keluarga punya bilik sendiri yang disekat dan berisi kamar. Pada betang Kanayat\'n, tiap pintu menampung 2 sampai 3 kepala keluarga.',
+          'Atapnya pelana memanjang. Hanya ada satu betang di tiap desa, sementara betang Dayak lain biasanya tidak lebih dari lima unit.'
+        ],
+        note: 'Catatan model: 8 pintu dari 35 pada betang Kanayat\'n. Bentuk dan ukuran pintu tidak disebut sumber.',
+        src: ['ik', 'jn'],
+        build: function (g, T, L) {
+          var W = function () { return T.m.wood('papan', false); };
+          var h = 2.4, y = FY + 0.2 + h / 2;
+          var back = T.box(0.14, h, 24.2, W(), -3.5, y, 0); g.add(back); T.spread(L, back, [-2.2, 0, 0]);
+          var fr = new THREE.Group(); g.add(fr);
+          var segs = [[-11.5, 1]]; for (var i = 0; i < 7; i++) segs.push([-9 + 3 * i, 2]); segs.push([11.5, 1]);
+          segs.forEach(function (s) { fr.add(T.box(0.14, h, s[1], W(), 3.5, y, s[0])); });
+          fr.add(T.box(0.14, 0.4, 24.2, W(), 3.5, FY + 0.2 + h - 0.2, 0));
+          T.spread(L, fr, [2.2, 0, 0]);
+          [-1, 1].forEach(function (s) {
+            var e = T.box(7.2, h, 0.14, W(), 0, y, s * 12.1); g.add(e); T.spread(L, e, [0, 0, s * 2.2]);
+          });
+        }
+      },
+      {
+        key: 'atap', name: 'Atap pelana', sub: 'Atap panjang',
+        kicker: 'Bagian 4 · penutup', anchor: [CX, 8.4, 0], cy: 8.2, base: [0, 0, 0], ex: [0, 6.0, 0],
+        paras: [
+          'Atapnya pelana memanjang, menutup seluruh rumah dan serambi. Beberapa tipe betang beratap melengkung dengan ujung mengarah ke atas, mirip tanduk rusa.',
+          'Rumah ini menjadi pusat budaya, tempat kegiatan sosial, budaya, dan pemerintahan adat berlangsung.'
+        ],
+        note: 'Catatan model: ujung atap hanya sedikit terangkat. Bahan penutup atap tidak disebut sumber, jadi digambar sebagai ijuk.',
+        src: ['ik', 'jn'],
+        build: function (g, T) {
+          var geo = T.curveRoof({ L: 12.8, halfW: function () { return 4.7; }, eave: eave, ridge: ridge, nz: 40, nu: 12, rx: 3, ry: 14 });
+          var r = new THREE.Mesh(geo, T.m.roof('ijuk')); r.position.x = CX; g.add(r);
+        }
+      },
+      {
+        key: 'hias', name: 'Hiasan enggang', sub: 'Kepala burung enggang',
+        kicker: 'Bagian 5 · hiasan', anchor: [CX, 9.8, 12.6], cy: 9.4, base: [0, 0, 0], ex: [0, 6.0, 0],
+        paras: [
+          'Betang dihiasi patung, ukiran, dan lukisan yang bermakna dalam kepercayaan Dayak. Ukiran kepala burung enggang disebut sebagai simbol suku Dayak pada betang tipe Muara Mea.'
+        ],
+        note: 'Catatan model: kepala enggang digambar sederhana di kedua ujung bubungan. Letak hiasan asli bervariasi antar-betang.',
+        src: ['jn', 'ik'],
+        build: function (g, T) {
+          [-1, 1].forEach(function (s) {
+            var t = 0.97, r = ridge(t);
+            var head = new THREE.Mesh(new THREE.SphereGeometry(0.45, 14, 12), T.m.plain(0xb3261e, 0.6, false));
+            head.position.set(CX, r + 0.5, s * 12.4); g.add(head);
+            var beak = new THREE.Mesh(new THREE.ConeGeometry(0.22, 1.1, 10), T.m.plain(0xd9a62f, 0.6, false));
+            beak.rotation.x = s * Math.PI / 2; beak.position.set(CX, r + 0.5, s * 13.1); g.add(beak);
+          });
+        }
+      },
+      {
+        key: 'kolong', space: true, n: 'K', name: 'Kolong', sub: 'Penyimpanan hasil panen',
+        kicker: 'Ruang · bawah rumah', anchor: [0, 0.6, 0], cy: 0.6, base: [0, 0, 0], ex: [0, 0, 0],
+        paras: ['Ruang di bawah rumah dipakai menyimpan padi hasil panen.'],
+        note: 'Catatan model: bidang emas menandai kolong.',
+        src: ['ik'],
+        build: function (g, T, L) { T.zone(L, { y: 0.05, cells: [{ w: 7.0, d: 24.0, x: 0, z: 0, a: 0.18 }] }); }
+      },
+      {
+        key: 'bilik', space: true, n: 'B', name: 'Bilik keluarga', sub: 'Disekat dan berkamar',
+        kicker: 'Ruang · dalam rumah', anchor: [-1.0, FY + 0.6, -10.5], cy: FY + 0.6, base: [0, 0, 0], ex: [0, 2.2, 0],
+        paras: [
+          'Tiap keluarga punya bilik sendiri yang disekat dan ada kamar di dalamnya.',
+          'Dapur kecil, sekitar 1 x 2 m, hanya berisi tungku perapian dengan kayu bakar disimpan di atasnya.'
+        ],
+        note: 'Catatan model: 8 bilik sama besar. Ukuran dan susunan bilik asli tidak disebut sumber.',
+        src: ['jn', 'ik'],
+        build: function (g, T, L) {
+          var cells = DOORS.map(function (z) { return { w: 3.2, d: 2.7, x: -1.7, z: z, a: 0.26 }; });
+          T.zone(L, { y: FY + 0.22, cells: cells });
+        }
+      },
+      {
+        key: 'serambi', space: true, n: 'S', name: 'Serambi', sub: 'Teras di depan pintu',
+        kicker: 'Ruang · depan', anchor: [4.4, FY + 0.5, 0], cy: FY + 0.5, base: [0, 0, 0], ex: [0, 2.2, 0],
+        paras: ['Tiap pintu punya serambi sendiri, dan serambi-serambi itu tidak disekat satu sama lain.'],
+        note: 'Catatan model: serambi digambar sebagai satu jalur panjang sepanjang rumah.',
+        src: ['ik'],
+        build: function (g, T, L) { T.zone(L, { y: FY + 0.22, cells: [{ w: 1.6, d: 23.6, x: 4.35, z: 0, a: 0.26 }] }); }
+      },
+      {
+        key: 'tangga', space: true, n: 'T', name: 'Tangga batang', sub: 'Bisa diangkat tiap malam',
+        kicker: 'Akses · serambi', anchor: [6.4, 1.9, 0], cy: 2.0, base: [0, 0, 0], ex: [0, 2.2, 0], selMove: [2.0, 0, 0],
+        paras: [
+          'Tangga dibuat dari batang kayu besar yang diberi lekuk agar mudah dinaiki. Jumlah anak tangga harus ganjil.',
+          'Tangga diangkat ke dalam rumah setiap malam.'
+        ],
+        note: 'Catatan model: 7 lekuk. Jumlah anak tangga asli tidak disebut sumber.',
+        src: ['ik', 'jn'],
+        build: function (g, T) {
+          var W = T.m.wood('ulin', false);
+          g.add(T.strut([7.6, 0, 0], [5.0, FY, 0], 0.5, W));
+          for (var i = 0; i < 7; i++) {
+            var f = (i + 0.7) / 7.6;
+            g.add(T.box(0.5, 0.1, 0.7, T.m.wood('nangka', false), 7.6 - 2.6 * f, FY * f + 0.25, 0));
+          }
+        }
+      }
+    ]
+  });
+})();
+App.start();
+</script>
+</body>
+</html>
