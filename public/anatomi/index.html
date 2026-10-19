@@ -945,7 +945,14 @@ var App = (function () {
     var id = houses[hashId] ? hashId : order[0];
     try { setupScene(); }
     catch (e) {
-      $('#fallback').hidden = false;
+      console.error('[anatomi] setupScene gagal:', e);
+      var fb = $('#fallback');
+      if (!window.THREE || !THREE.OrbitControls) {
+        fb.textContent = 'Pustaka 3D gagal dimuat (jaringan atau pemblokir iklan mungkin memblokir cdn.jsdelivr.net). Muat ulang halaman.';
+      } else if (!(e && /WebGL/i.test(String(e.message || e)))) {
+        fb.textContent = 'Terjadi galat saat menyiapkan scene 3D: ' + (e && e.message ? e.message : e);
+      }
+      fb.hidden = false;
       cur = houses[id]; cur.keys = []; assignNumbers(cur);
       renderCard(null);
       return;
