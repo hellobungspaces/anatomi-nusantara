@@ -3,6 +3,13 @@ export type Vec3 = [number, number, number];
 /** Satu sumber rujukan: [judul, url]. */
 export type Source = [title: string, url: string];
 
+/** Lokasi rumah: pulau > provinsi > kota/kabupaten. Isi yang sudah pasti saja, sisanya dikosongkan. */
+export interface Region {
+  pulau: string;
+  provinsi?: string;
+  kota?: string;
+}
+
 export interface Layer {
   key: string;
   name: string;
@@ -34,6 +41,7 @@ export interface House {
   id: string;
   tab: string;
   place: string;
+  region: Region;
   kicker: string;
   title: string;
   paras: string[];

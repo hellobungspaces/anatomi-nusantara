@@ -4,6 +4,7 @@ export const betangHouse: House = {
   "id": "betang",
   "tab": "Betang",
   "place": "Dayak, Kalimantan",
+  "region": {"pulau":"Kalimantan"},
   "kicker": "Rumah Betang · rumah panjang Dayak",
   "title": "Satu atap untuk banyak keluarga",
   "paras": [

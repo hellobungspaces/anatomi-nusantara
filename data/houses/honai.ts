@@ -4,6 +4,7 @@ export const honaiHouse: House = {
   "id": "honai",
   "tab": "Honai",
   "place": "Papua Pegunungan",
+  "region": {"pulau":"Papua","provinsi":"Papua Pegunungan"},
   "kicker": "Honai · rumah adat suku Dani",
   "title": "Rumah bulat penahan dingin",
   "paras": [

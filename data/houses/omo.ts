@@ -4,6 +4,7 @@ export const omoHouse: House = {
   "id": "omo",
   "tab": "Omo Sebua",
   "place": "Nias",
+  "region": {"pulau":"Nias","provinsi":"Sumatera Utara","kota":"Nias Selatan"},
   "kicker": "Omo Sebua · rumah adat Nias",
   "title": "Rumah panggung tanpa paku",
   "paras": [

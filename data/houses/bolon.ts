@@ -4,6 +4,7 @@ export const bolonHouse: House = {
   "id": "bolon",
   "tab": "Rumah Bolon",
   "place": "Batak Toba",
+  "region": {"pulau":"Sumatera","provinsi":"Sumatera Utara"},
   "kicker": "Rumah Bolon · rumah adat Batak Toba",
   "title": "Rumah berpunggung kerbau",
   "paras": [

@@ -4,6 +4,7 @@ export const gadangHouse: House = {
   "id": "gadang",
   "tab": "Rumah Gadang",
   "place": "Minangkabau",
+  "region": {"pulau":"Sumatera","provinsi":"Sumatera Barat"},
   "kicker": "Rumah Gadang · rumah adat Minangkabau",
   "title": "Rumah beratap gonjong",
   "paras": [

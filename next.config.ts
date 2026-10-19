@@ -1,16 +1,14 @@
 import type { NextConfig } from "next";
 
 const nextConfig: NextConfig = {
-  /* config options here */
   cacheComponents: true,
   partialPrefetching: true,
-  turbopack: {
-    rules: {
-      "*.css": {
-        loaders: ["@tailwindcss/turbopack"],
-        as: "*.css",
-      },
-    },
+  // Beranda adalah viewer 3D statis di public/anatomi. Rewrite menjaga alamatnya tetap "/"
+  // sehingga hash (#joglo) langsung terbaca oleh viewer, tanpa iframe.
+  async rewrites() {
+    return {
+      beforeFiles: [{ source: "/", destination: "/anatomi/index.html" }],
+    };
   },
 };
 

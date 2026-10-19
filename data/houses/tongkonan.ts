@@ -4,6 +4,7 @@ export const tongkonanHouse: House = {
   "id": "tongkonan",
   "tab": "Tongkonan",
   "place": "Toraja",
+  "region": {"pulau":"Sulawesi","provinsi":"Sulawesi Selatan"},
   "kicker": "Tongkonan · rumah adat Toraja",
   "title": "Rumah beratap perahu",
   "paras": [

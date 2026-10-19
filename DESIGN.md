@@ -1,39 +1,44 @@
 # DESIGN.md
 
-Arah visual dan bahasa untuk Anatomi Rumah Nusantara. Dipilih pemilik proyek: "hangat, kertas & tinta".
+Arah visual dan bahasa untuk Anatomi Rumah Nusantara. Dipilih pemilik proyek: satu layar, model 3D memenuhi layar, tema gelap hangat.
 
 ## Identitas
-Buku arsitektur yang bisa diputar. Tenang, padat isi, tidak berisik. Rumahnya yang jadi bintang, bukan antarmukanya.
+Ruang pamer yang bisa diputar. Modelnya bintang, antarmuka menepi. Tidak ada halaman pengantar: layar pertama adalah rumahnya.
+
+## Struktur
+Satu halaman (`/`) yang dilayani dari `public/anatomi/index.html` lewat rewrite di `next.config.ts`. Rumah aktif ada di hash (`/#tongkonan`) sehingga bisa dibagikan.
+- Bar atas: nama proyek, tombol ‹ ›, dan tombol nama rumah yang membuka pemilih bertingkat pulau > provinsi > kota.
+- Desktop: kartu penjelasan melayang di kanan atas, bagian rumah jadi baris chip di bawah, kontrol di dasar.
+- HP: bottom sheet tiga tingkat (peek, setengah, penuh). Memilih bagian membuka sheet ke setengah dan panggung mengecil mengikuti sheet.
 
 ## Dial (anti-slop R-37)
-- ENERGY 2: tenang, banyak ruang kosong, satu aksen.
-- RHYTHM 3: tiap section punya komposisi sendiri (hero rata kiri, daftar dua kolom dengan pratinjau, catatan satu kolom sempit, tabel sumber).
-- MOTION 2: gerak hanya untuk memberi tahu perubahan (pratinjau rumah berganti, panel menu). Tidak ada fade-up di setiap elemen. Hormati `prefers-reduced-motion`.
+- ENERGY 2, RHYTHM 2, MOTION 2. Gerak hanya untuk perubahan keadaan (sheet naik, kamera pindah ke bagian terpilih). Hormati `prefers-reduced-motion`.
 
-## Warna (satu tema terang, sengaja)
+## Warna (satu tema gelap, sengaja)
 | Token | Nilai | Dipakai untuk |
 |---|---|---|
-| background | #f4efe6 | latar halaman (krem kertas) |
-| card | #fbf8f1 | panel, kartu |
-| foreground | #1e1b16 | teks (tinta) |
-| muted-foreground | #5e564a | teks sekunder, kontras 6,6:1 di atas background |
-| border | #d6cbb7 | garis tipis |
-| primary | #9a4520 | satu-satunya aksen (terakota): tombol utama, tautan, fokus |
+| bg | #15120e | latar |
+| panel | #211b14 | bar, kartu, sheet |
+| chip | #2e261d | tombol, baris terpilih |
+| ink | #f1e9da | teks |
+| muted | #bcb09b | teks sekunder |
+| line | #3d3329 | garis tipis |
+| gold / accent | #e0ad4a / #ecbf6c | satu-satunya aksen: tombol utama, bagian terpilih, label |
 
-Tema gelap tidak dikirim. Menambah mode gelap berarti memverifikasi ulang semua token dan viewer 3D (R-34).
+Tema terang tidak dikirim. Menambahnya berarti memverifikasi ulang semua token dan adegan 3D (R-34).
 
 ## Huruf
-- Judul: Fraunces (serif). Alasan: nuansa buku dan arsip, cocok untuk nama-nama rumah adat; lain dari default sans yang dipakai AI.
-- Teks: Source Sans 3. Alasan: terbaca di ukuran kecil, mendukung diakritik bahasa Indonesia.
-- Mono hanya untuk angka di viewer (sudut, persen bongkar). Tidak ada label kapital berspasi lebar.
+- Judul dan nama rumah: Fraunces (serif), nuansa buku arsip.
+- Teks dan kontrol: Source Sans 3.
+- Mono hanya untuk angka di HUD viewer.
 
 ## Bentuk
-Radius kecil (8 sampai 12px), garis 1px, tanpa glow, tanpa glassmorphism, bayangan hanya untuk panel yang melayang (menu seluler).
+Radius 8 sampai 12px, garis 1px, tanpa glow dan glassmorphism. Target sentuh minimal 44px (penanda di model 40px di HP).
+
+## Data lokasi
+`region` (pulau, provinsi, kota) ada di `data/types.ts` dan di tiap rumah di viewer. Isi hanya yang pasti; sisanya dikosongkan dan tidak ditampilkan. Kota yang terisi saat ini hanya yang disebut di sumber (Joglo: Sleman, Omo Sebua: Nias Selatan).
 
 ## Isi dan bahasa
-- Bahasa Indonesia sehari-hari, kalimat pendek, tanpa tanda pisah panjang (em dash).
-- Hanya angka yang bisa dihitung dari data (jumlah rumah, jumlah bagian). Tidak ada statistik, testimoni, atau logo mitra.
-- Ajakan menyebut tindakan nyata ("Buka model Joglo"), bukan "Mulai" atau "Jelajahi".
-- Tidak ada ikon dekoratif. Tidak ada ilustrasi buatan agen. Gambar rumah hanya model 3D itu sendiri.
-- Tidak ada navigasi ke halaman yang belum ada. Navigasi: Rumah, Tentang, Sumber.
-- Pengembangan lanjutan (peta, bandingkan antar rumah) belum dibuat dan tidak ditampilkan.
+- Bahasa Indonesia sehari-hari, kalimat pendek, tanpa tanda pisah panjang.
+- Tidak ada statistik, testimoni, atau logo mitra. Angka hanya yang ada di sumber.
+- Tidak ada ikon dekoratif atau ilustrasi buatan agen. Gambar rumah hanya model 3D itu sendiri.

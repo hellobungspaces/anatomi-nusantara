@@ -4,6 +4,7 @@ export const jogloHouse: House = {
   "id": "joglo",
   "tab": "Joglo",
   "place": "Jawa",
+  "region": {"pulau":"Jawa","provinsi":"DI Yogyakarta","kota":"Sleman"},
   "kicker": "Joglo · rumah adat Jawa",
   "title": "Rumah beratap gunungan",
   "paras": [
